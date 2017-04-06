@@ -14,25 +14,7 @@ namespace Bundler {
     /// The base processor. Asset processors inherit from this.
     /// </summary>
     public abstract class ProcessorBase {
-        /// <summary>
-        /// Returns a Uri representing the url from the given token from the whitelist in the web.config.
-        /// </summary>
-        /// <param name="token">The token to look up.</param>
-        /// <returns>A Uri representing the url from the given token from the whitelist in the web.config.</returns>
-        protected Uri GetUrlFromToken(string token) {
-            Uri url = null;
-            BundlerSecuritySection.WhiteListElementCollection remoteFileWhiteList = BundlerConfiguration.Instance.RemoteFileWhiteList;
-            BundlerSecuritySection.SafeUrl safeUrl = remoteFileWhiteList.Cast<BundlerSecuritySection.SafeUrl>()
-                                                                         .FirstOrDefault(item => item.Token.ToUpperInvariant()
-                                                                         .Equals(token.ToUpperInvariant()));
 
-            if (safeUrl != null) {
-                // Url encode any value here as we cannot store them encoded in the web.config.
-                url = safeUrl.Url;
-            }
-
-            return url;
-        }
 
         /// <summary>
         /// Adds a resource to the cache.

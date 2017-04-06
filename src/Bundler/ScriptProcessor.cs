@@ -51,10 +51,7 @@ namespace Bundler {
                         BundlerOptions cruncherOptions = new BundlerOptions {
                             MinifyCacheKey = key,
                             Minify = minify,
-                            CacheFiles = true,
-                            AllowRemoteFiles = BundlerConfiguration.Instance.AllowRemoteDownloads,
-                            RemoteFileMaxBytes = BundlerConfiguration.Instance.MaxBytes,
-                            RemoteFileTimeout = BundlerConfiguration.Instance.Timeout
+                            CacheFiles = true
                         };
 
                         ScriptBundler javaScriptCruncher = new ScriptBundler(cruncherOptions, context);
@@ -78,24 +75,6 @@ namespace Bundler {
                                     if (File.Exists(javaScriptFilePath)) {
                                         files.Add(javaScriptFilePath);
                                     }
-                                } else {
-                                    // Get the path from the server.
-                                    // Loop through each possible directory.
-                                    foreach (string javaScriptFolder in BundlerConfiguration.Instance.JavaScriptPaths) {
-                                        if (!string.IsNullOrWhiteSpace(javaScriptFolder)
-                                            && javaScriptFolder.Trim().StartsWith("~/")) {
-                                            DirectoryInfo directoryInfo =
-                                                new DirectoryInfo(context.Server.MapPath(javaScriptFolder));
-
-                                            if (directoryInfo.Exists) {
-                                                files.AddRange(
-                                                    Directory.GetFiles(
-                                                        directoryInfo.FullName,
-                                                        path,
-                                                        SearchOption.AllDirectories));
-                                            }
-                                        }
-                                    }
                                 }
 
                                 if (files.Any()) {
@@ -104,11 +83,8 @@ namespace Bundler {
                                     cruncherOptions.RootFolder = Path.GetDirectoryName(first);
                                     stringBuilder.Append(await javaScriptCruncher.CrunchAsync(first));
                                 }
-                            } else {
-                                // Remote files.
-                                string remoteFile = this.GetUrlFromToken(path).ToString();
-                                stringBuilder.Append(await javaScriptCruncher.CrunchAsync(remoteFile));
-                            }
+                            } 
+                            
                         }
 
                         combinedJavaScript = stringBuilder.ToString();

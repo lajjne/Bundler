@@ -19,24 +19,9 @@ namespace Bundler.Configuration {
         private static readonly Lazy<BundlerConfiguration> Lazy = new Lazy<BundlerConfiguration>(() => new BundlerConfiguration());
 
         /// <summary>
-        /// Represents a CruncherSecuritySection within a configuration file.
-        /// </summary>
-        private BundlerSecuritySection securitySection;
-
-        /// <summary>
         /// Represents a CruncherProcessingSection within a configuration file.
         /// </summary>
         private BundlerProcessingSection processingSection;
-
-        /// <summary>
-        /// An array of registered css paths for the application.
-        /// </summary>
-        private IList<string> cssPaths;
-
-        /// <summary>
-        /// An array of registered JavaScript paths for the application.
-        /// </summary>
-        private IList<string> javaScriptPaths;
 
         /// <summary>
         /// The auto prefixer options.
@@ -64,43 +49,6 @@ namespace Bundler.Configuration {
         }
 
         /// <summary>
-        /// Gets a list of white-listed urls that images can be downloaded from.
-        /// </summary>
-        public BundlerSecuritySection.WhiteListElementCollection RemoteFileWhiteList {
-            get {
-                return this.GetCruncherSecuritySection().WhiteList;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the current application is allowed to download remote files.
-        /// </summary>
-        public bool AllowRemoteDownloads {
-            get {
-                return this.GetCruncherSecuritySection().AllowRemoteDownloads;
-            }
-        }
-
-        /// <summary>
-        /// Gets the maximum length to wait in milliseconds before throwing an error requesting a remote file.
-        /// </summary>
-        public int Timeout {
-            get {
-                return this.GetCruncherSecuritySection().Timeout;
-            }
-        }
-
-        /// <summary>
-        /// Gets the maximum allowable size in bytes of e remote file to process.
-        /// </summary>
-        public int MaxBytes {
-            get {
-                return this.GetCruncherSecuritySection().MaxBytes;
-            }
-        }
-
-
-        /// <summary>
         /// Gets the delegate that creates an instance of JavaScript engine.
         /// </summary>
         public Func<IJsEngine> JsEngineFunc {
@@ -112,26 +60,6 @@ namespace Bundler.Configuration {
                 }
 
                 return this.javaScriptEngineFunc;
-            }
-        }
-
-        /// <summary>
-        /// Gets an array of registered css paths for the application.
-        /// </summary>
-        public IList<string> CSSPaths {
-            get {
-                return this.cssPaths
-                       ?? (this.cssPaths = this.GetCruncherProcessingSection().VirtualPaths.CSSPaths.Split(',').Select(p => p.Trim()).ToList());
-            }
-        }
-
-        /// <summary>
-        /// Gets an array of registered JavaScript paths for the application.
-        /// </summary>
-        public IList<string> JavaScriptPaths {
-            get {
-                return this.javaScriptPaths
-                       ?? (this.javaScriptPaths = this.GetCruncherProcessingSection().VirtualPaths.JavaScriptPaths.Split(',').Select(p => p.Trim()).ToList());
             }
         }
 
@@ -160,14 +88,6 @@ namespace Bundler.Configuration {
             get {
                 return this.GetAutoPrefixerOptions();
             }
-        }
-
-        /// <summary>
-        /// Retrieves the security configuration section from the current application configuration. 
-        /// </summary>
-        /// <returns>The security configuration section from the current application configuration. </returns>
-        private BundlerSecuritySection GetCruncherSecuritySection() {
-            return this.securitySection ?? (this.securitySection = BundlerSecuritySection.GetConfiguration());
         }
 
         /// <summary>

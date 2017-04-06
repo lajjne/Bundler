@@ -62,9 +62,7 @@ namespace Bundler {
         public async Task<string> CrunchAsync(string resource) {
             StringBuilder stringBuilder = new StringBuilder();
 
-            if (this.IsRemoteFile(resource)) {
-                stringBuilder.Append(await this.LoadRemoteFileAsync(resource));
-            } else if (this.IsValidPath(resource)) {
+            if (this.IsValidPath(resource)) {
                 stringBuilder.Append(await this.LoadLocalFolderAsync(resource));
             } else {
                 stringBuilder.Append(await this.LoadLocalFileAsync(resource));
@@ -145,26 +143,6 @@ namespace Bundler {
             return stringBuilder.ToString();
         }
 
-        /// <summary>
-        /// Loads the remote file.
-        /// </summary>
-        /// <param name="url">The url to the resource.</param>
-        /// <returns>The contents of the remote file as a string.</returns>
-        private async Task<string> LoadRemoteFileAsync(string url) {
-            string contents = string.Empty;
-
-            if (this.Options.AllowRemoteFiles) {
-                RemoteFile remoteFile = new RemoteFile(new Uri(url)) {
-                    MaxDownloadSize = this.Options.RemoteFileMaxBytes,
-                    TimeoutLength = this.Options.RemoteFileTimeout
-                };
-
-                // Return the preprocessed css.
-                contents = this.PreProcessInput(await remoteFile.GetFileAsStringAsync(), url);
-            }
-
-            return contents;
-        }
 
         /// <summary>
         /// Determines whether the current resource is a valid file.
@@ -188,16 +166,6 @@ namespace Bundler {
             return resource.Contains("\\") && Directory.Exists(resource);
         }
 
-        /// <summary>
-        /// Determines whether the current resource is a remote file.
-        /// </summary>
-        /// <param name="resource">The file or folder containing the resource(s) to check.</param>
-        /// <returns>
-        ///   <c>true</c> if the current resource is a remote file; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsRemoteFile(string resource) {
-            return RemoteRegex.IsMatch(resource);
-        }
 
 
     }

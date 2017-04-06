@@ -46,10 +46,7 @@ namespace Bundler {
                         BundlerOptions cruncherOptions = new BundlerOptions {
                             MinifyCacheKey = key,
                             Minify = minify,
-                            CacheFiles = true,
-                            AllowRemoteFiles = BundlerConfiguration.Instance.AllowRemoteDownloads,
-                            RemoteFileMaxBytes = BundlerConfiguration.Instance.MaxBytes,
-                            RemoteFileTimeout = BundlerConfiguration.Instance.Timeout
+                            CacheFiles = true
                         };
 
                         StyleBundler cssCruncher = new StyleBundler(cruncherOptions, context);
@@ -73,21 +70,6 @@ namespace Bundler {
                                     if (File.Exists(cssFilePath)) {
                                         files.Add(cssFilePath);
                                     }
-                                } else {
-                                    // Get the path from the server.
-                                    // Loop through each possible directory.
-                                    foreach (string cssPath in BundlerConfiguration.Instance.CSSPaths) {
-                                        if (!string.IsNullOrWhiteSpace(cssPath) && cssPath.Trim().StartsWith("~/")) {
-                                            DirectoryInfo directoryInfo = new DirectoryInfo(context.Server.MapPath(cssPath));
-
-                                            if (directoryInfo.Exists) {
-                                                IEnumerable<FileInfo> fileInfos =
-                                                    await
-                                                    directoryInfo.EnumerateFilesAsync(path, SearchOption.AllDirectories);
-                                                files.AddRange(fileInfos.Select(f => f.FullName));
-                                            }
-                                        }
-                                    }
                                 }
 
                                 if (files.Any()) {
@@ -96,11 +78,7 @@ namespace Bundler {
                                     cruncherOptions.RootFolder = Path.GetDirectoryName(first);
                                     stringBuilder.Append(await cssCruncher.CrunchAsync(first));
                                 }
-                            } else {
-                                // Remote files.
-                                string remoteFile = this.GetUrlFromToken(path).ToString();
-                                stringBuilder.Append(await cssCruncher.CrunchAsync(remoteFile));
-                            }
+                            } 
                         }
 
                         combinedCSS = stringBuilder.ToString();
