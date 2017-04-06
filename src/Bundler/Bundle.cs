@@ -69,22 +69,20 @@ namespace Bundler {
             if (!context.IsDebuggingEnabled) {
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, true, fileNames));
                 string fileName = $"{fileContent.ToMd5Fingerprint()}.css";
-                return
-                    new HtmlString(
-                        string.Format(
-                            CssPhysicalFileTemplate,
-                            AsyncHelper.RunSync(
-                                () => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
-                            mediaQuery));
+                return new HtmlString(string.Format(CssPhysicalFileTemplate,
+                    AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
+                    mediaQuery));
             }
+
+            // Expand .bundle files
+            //fileNames = ResourceHelper.ExpandBundles(null, fileNames);
 
             // Render them separately for debug mode.
             foreach (string name in fileNames) {
                 string currentName = name;
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, false, currentName));
                 string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.css";
-                stringBuilder.AppendFormat(
-                    CssPhysicalFileTemplate,
+                stringBuilder.AppendFormat(CssPhysicalFileTemplate,
                     AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
                     mediaQuery);
                 stringBuilder.AppendLine();
@@ -138,6 +136,9 @@ namespace Bundler {
                                 () => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
                             behaviourParam));
             }
+
+            // Expand .bundle files
+            //fileNames = ResourceHelper.ExpandBundles(null, fileNames);
 
             // Render them separately for debug mode.
             foreach (string name in fileNames) {

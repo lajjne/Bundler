@@ -40,43 +40,7 @@ namespace Bundler {
             }
         }
 
-        protected string[] ExpandBundles(BundlerBase bundler, params string[] fileNames) {
-            // Expand bundles
-            List<string> paths = new List<string>();
-            foreach (var fileName in fileNames) {
-                if (Path.GetExtension(fileName) == ".bundle") {
-                    // Resolve files specified in the bundle
-                    FileInfo fileInfo = null;
 
-                    // Try to get the file by absolute/relative path
-                    if (!ResourceHelper.IsResourceFilenameOnly(fileName)) {
-                        string filePath = ResourceHelper.GetFilePath(fileName, bundler.Options.RootFolder, bundler.Context);
-                        if (File.Exists(filePath)) {
-                            fileInfo = new FileInfo(filePath);
-                        }
-                    } else {
-                        fileInfo = new FileInfo(Path.GetFullPath(Path.Combine(bundler.Options.RootFolder, fileName)));
-                    }
-
-                    // Add the filenames from the bundle
-                    if (fileInfo != null && fileInfo.Exists) {
-                        string file = fileInfo.FullName;
-                        var lines = File.ReadAllLines(file);
-                        bundler.AddFileMonitor(file, string.Join(Environment.NewLine, lines));
-                        foreach (var line in lines) {
-                            if (line.StartsWith("#")) {
-                                continue;
-                            }
-                            paths.Add(Path.Combine(fileInfo.DirectoryName, line));
-                        }
-                    }
-                } else {
-                    paths.Add(fileName);
-                }
-            }
-
-            return paths.ToArray();
-        }
 
     }
 }

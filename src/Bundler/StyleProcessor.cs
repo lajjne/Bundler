@@ -52,7 +52,7 @@ namespace Bundler {
                         StyleBundler cssCruncher = new StyleBundler(cruncherOptions, context);
 
                         // Expand bundles
-                        paths = ExpandBundles(cssCruncher, paths);
+                        paths = ResourceHelper.ExpandBundles(cssCruncher, paths);
 
                         // Loop through and process each file.
                         foreach (string path in paths) {
