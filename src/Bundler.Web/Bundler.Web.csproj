@@ -1,4 +1,5 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
   <Import Project="..\..\packages\JavaScriptEngineSwitcher.V8.Native.win-x86.2.2.0\build\JavaScriptEngineSwitcher.V8.Native.win-x86.props" Condition="Exists('..\..\packages\JavaScriptEngineSwitcher.V8.Native.win-x86.2.2.0\build\JavaScriptEngineSwitcher.V8.Native.win-x86.props')" />
   <Import Project="..\..\packages\JavaScriptEngineSwitcher.V8.Native.win-x64.2.2.0\build\JavaScriptEngineSwitcher.V8.Native.win-x64.props" Condition="Exists('..\..\packages\JavaScriptEngineSwitcher.V8.Native.win-x64.2.2.0\build\JavaScriptEngineSwitcher.V8.Native.win-x64.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
@@ -25,6 +26,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TypeScriptToolsVersion>2.1</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -99,6 +101,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="css\imports\style2.css" />
+    <Content Include="css\imports\style3.css" />
+    <None Include="css\style.bundle" />
+    <Content Include="css\style.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="js\bootstrap3\bootstrap.js" />
     <Content Include="js\bootstrap3\bootstrap.min.js" />
@@ -112,6 +118,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\BundlerConfig.cs" />
     <Compile Include="App_Start\JsEngineSwitcherConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -282,6 +289,7 @@
     <Content Include="css\bootstrap4\_variables.scss" />
     <Content Include="Views\Home\Bootstrap3.cshtml" />
     <Content Include="Views\Home\Bootstrap4.cshtml" />
+    <Content Include="Views\Home\Bundled.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -299,11 +307,18 @@
       <Name>Bundler</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="js\script.bundle" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <ProjectExtensions>

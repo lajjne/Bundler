@@ -54,7 +54,8 @@ namespace Bundler {
 
                         StyleBundler cssCruncher = new StyleBundler(cruncherOptions, context);
 
-                        AutoPrefixerOptions autoPrefixerOptions = BundlerConfiguration.Instance.AutoPrefixerOptions;
+                        // Expand bundles
+                        paths = ExpandBundles(cssCruncher, paths);
 
                         // Loop through and process each file.
                         foreach (string path in paths) {
@@ -105,7 +106,7 @@ namespace Bundler {
                         combinedCSS = stringBuilder.ToString();
 
                         // Apply autoprefixer
-                        combinedCSS = cssCruncher.AutoPrefix(combinedCSS, autoPrefixerOptions);
+                        combinedCSS = cssCruncher.AutoPrefix(combinedCSS, BundlerConfiguration.Instance.AutoPrefixerOptions);
 
                         if (minify) {
                             combinedCSS = cssCruncher.Minify(combinedCSS);

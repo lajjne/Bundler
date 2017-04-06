@@ -1,8 +1,10 @@
 ﻿using Bundler.Extensions;
 using Bundler.Helpers;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
+using System.Web.Hosting;
 
 namespace Bundler {
 
@@ -19,7 +21,7 @@ namespace Bundler {
         /// <summary>
         /// The template for generating JavaScript links pointing to a physical file
         /// </summary>
-        private const string JavaScriptPhysicalFileTemplate = "<script src=\"{0}\" {1}></script>";
+        private const string JavaScriptPhysicalFileTemplate = "<script src=\"{0}\"{1}></script>";
 
         /// <summary>
         /// The CSS handler.
@@ -80,7 +82,7 @@ namespace Bundler {
             foreach (string name in fileNames) {
                 string currentName = name;
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, false, currentName));
-                string fileName = $"{Path.GetFileNameWithoutExtension(name)}{fileContent.ToMd5Fingerprint()}.css";
+                string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.css";
                 stringBuilder.AppendFormat(
                     CssPhysicalFileTemplate,
                     AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
@@ -122,9 +124,7 @@ namespace Bundler {
             StringBuilder stringBuilder = new StringBuilder();
             HttpContext context = HttpContext.Current;
 
-            string behaviourParam = behaviour == JavaScriptLoadBehaviour.Inline
-                                        ? string.Empty
-                                        : behaviour.ToString().ToLowerInvariant();
+            string behaviourParam = behaviour == JavaScriptLoadBehaviour.Inline ? string.Empty : " " + behaviour.ToString().ToLowerInvariant();
 
             // Minify on release.
             if (!context.IsDebuggingEnabled) {
@@ -143,7 +143,7 @@ namespace Bundler {
             foreach (string name in fileNames) {
                 string currentName = name;
                 string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, false, currentName));
-                string fileName = $"{Path.GetFileNameWithoutExtension(name)}{fileContent.ToMd5Fingerprint()}.js";
+                string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.js";
                 stringBuilder.AppendFormat(
                     JavaScriptPhysicalFileTemplate,
                     AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),

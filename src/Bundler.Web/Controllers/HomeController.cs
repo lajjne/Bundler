@@ -18,5 +18,9 @@ namespace Bundler.Web2.Controllers {
         public ActionResult Bootstrap4() {
             return View();
         }
+
+        public ActionResult Bundled() {
+            return View();
+        }
     }
 }
