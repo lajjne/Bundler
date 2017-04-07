@@ -39,8 +39,5 @@ namespace Bundler {
                 CacheManager.AddItem(key, contents, cacheItemPolicy);
             }
         }
-
-
-
     }
 }

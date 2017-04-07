@@ -51,11 +51,15 @@ namespace Bundler {
 
                         StyleBundler bundler = new StyleBundler(cruncherOptions, context);
 
-                        // Expand bundles
-                        paths = ResourceHelper.ExpandBundles(bundler, paths);
-
                         // Loop through and process each file
                         foreach (string path in paths) {
+
+                            // Monitor .bundle file
+                            if (Path.GetExtension(path) == ".bundle") {
+                                bundler.AddFileMonitor(path, "not empty");
+                                continue;
+                            }
+
                             if (PreprocessorManager.Instance.AllowedExtensionsRegex.IsMatch(path)) {
                                 string filePath = ResourceHelper.GetFilePath(path, cruncherOptions.RootFolder, context);
                                 if (File.Exists(filePath)) {

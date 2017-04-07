@@ -65,27 +65,31 @@ namespace Bundler {
             StringBuilder stringBuilder = new StringBuilder();
             HttpContext context = HttpContext.Current;
 
+            // Expand .bundle files
+            fileNames = ResourceHelper.ExpandBundles(context, fileNames);
+
             // Minify on release.
             if (!context.IsDebuggingEnabled) {
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, true, fileNames));
-                string fileName = $"{fileContent.ToMd5Fingerprint()}.css";
-                return new HtmlString(string.Format(CssPhysicalFileTemplate,
-                    AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
-                    mediaQuery));
+                if (!string.IsNullOrWhiteSpace(fileContent)) {
+                    string fileName = $"{fileContent.ToMd5Fingerprint()}.css";
+                    return new HtmlString(string.Format(CssPhysicalFileTemplate,
+                        AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
+                        mediaQuery));
+                }
             }
-
-            // Expand .bundle files
-            //fileNames = ResourceHelper.ExpandBundles(null, fileNames);
 
             // Render them separately for debug mode.
             foreach (string name in fileNames) {
                 string currentName = name;
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, false, currentName));
-                string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.css";
-                stringBuilder.AppendFormat(CssPhysicalFileTemplate,
-                    AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
-                    mediaQuery);
-                stringBuilder.AppendLine();
+                if (!string.IsNullOrWhiteSpace(fileContent)) {
+                    string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.css";
+                    stringBuilder.AppendFormat(CssPhysicalFileTemplate,
+                        AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
+                        mediaQuery);
+                    stringBuilder.AppendLine();
+                }
             }
 
             return new HtmlString(stringBuilder.ToString());
@@ -122,34 +126,38 @@ namespace Bundler {
             StringBuilder stringBuilder = new StringBuilder();
             HttpContext context = HttpContext.Current;
 
+            // Expand .bundle files
+            fileNames = ResourceHelper.ExpandBundles(context, fileNames);
+
             string behaviourParam = behaviour == JavaScriptLoadBehaviour.Inline ? string.Empty : " " + behaviour.ToString().ToLowerInvariant();
 
             // Minify on release.
             if (!context.IsDebuggingEnabled) {
                 string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, true, fileNames));
-                string fileName = $"{fileContent.ToMd5Fingerprint()}.js";
-                return
-                    new HtmlString(
-                        string.Format(
-                            JavaScriptPhysicalFileTemplate,
-                            AsyncHelper.RunSync(
-                                () => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
-                            behaviourParam));
+                if (!string.IsNullOrWhiteSpace(fileContent)) {
+                    string fileName = $"{fileContent.ToMd5Fingerprint()}.js";
+                    return
+                        new HtmlString(
+                            string.Format(
+                                JavaScriptPhysicalFileTemplate,
+                                AsyncHelper.RunSync(
+                                    () => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
+                                behaviourParam));
+                }
             }
-
-            // Expand .bundle files
-            //fileNames = ResourceHelper.ExpandBundles(null, fileNames);
 
             // Render them separately for debug mode.
             foreach (string name in fileNames) {
                 string currentName = name;
                 string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, false, currentName));
-                string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.js";
-                stringBuilder.AppendFormat(
-                    JavaScriptPhysicalFileTemplate,
-                    AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
-                    behaviourParam);
-                stringBuilder.AppendLine();
+                if (!string.IsNullOrWhiteSpace(fileContent)) {
+                    string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.js";
+                    stringBuilder.AppendFormat(
+                        JavaScriptPhysicalFileTemplate,
+                        AsyncHelper.RunSync(() => ResourceHelper.CreateResourcePhysicalFileAsync(fileName, fileContent)),
+                        behaviourParam);
+                    stringBuilder.AppendLine();
+                }
             }
 
             return new HtmlString(stringBuilder.ToString());
