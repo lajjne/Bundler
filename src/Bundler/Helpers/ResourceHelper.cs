@@ -24,6 +24,39 @@ namespace Bundler.Helpers {
         /// </summary>
         private static readonly Regex PhysicalFileRegex = new Regex(@"\.(css|js)$", RegexOptions.IgnoreCase);
 
+        /// <summary>
+        /// Expand .bundle files
+        /// </summary>
+        /// <param name="bundler"></param>
+        /// <param name="fileNames"></param>
+        /// <returns></returns>
+        public static string[] ExpandBundles(BundlerBase bundler, params string[] fileNames) {
+            List<string> paths = new List<string>();
+            foreach (var fileName in fileNames) {
+                if (Path.GetExtension(fileName) == ".bundle") {
+                    string bundleFile = ResourceHelper.GetFilePath(fileName, bundler.Options.RootFolder, bundler.Context);
+                    if (File.Exists(bundleFile)) {
+                        // Add the filenames from the bundle
+                        var lines = File.ReadAllLines(bundleFile);
+                        foreach (var line in lines) {
+                            if (line.StartsWith("#")) {
+                                continue;
+                            }
+                            var path = ResourceHelper.GetFilePath(line, Path.GetDirectoryName(bundleFile), bundler.Context);
+                            if (File.Exists(path)) {
+                                paths.Add(path);
+                            }
+                        }
+
+                        // Monitor .bundle for changes
+                        bundler.AddFileMonitor(bundleFile, string.Join(Environment.NewLine, lines));
+                    }
+                } else {
+                    paths.Add(fileName);
+                }
+            }
+            return paths.ToArray();
+        }
 
         /// <summary>
         /// Returns the file path to the specified resource.

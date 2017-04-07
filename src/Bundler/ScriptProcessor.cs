@@ -57,7 +57,7 @@ namespace Bundler {
                         ScriptBundler bundler = new ScriptBundler(cruncherOptions, context);
 
                         // Expand bundles
-                        paths = ExpandBundles(bundler, paths);
+                        paths = ResourceHelper.ExpandBundles(bundler, paths);
 
                         // Loop through and process each file
                         foreach (string path in paths) {
