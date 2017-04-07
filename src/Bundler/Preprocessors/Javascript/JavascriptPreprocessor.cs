@@ -45,21 +45,9 @@ namespace Bundler.Preprocessors.Less {
                 if (fileCaptures.Count > 0) {
                     string fileName = fileCaptures[0].ToString();
                     string importedJavascript = string.Empty;
-
-                    // Check and add the @import the match.
-                    FileInfo fileInfo = null;
-
-                    // Try to get the file by absolute/relative path
-                    if (!ResourceHelper.IsResourceFilenameOnly(fileName)) {
-                        string cssFilePath = ResourceHelper.GetFilePath(fileName, cruncher.Options.RootFolder, cruncher.Context);
-                        if (File.Exists(cssFilePath)) {
-                            fileInfo = new FileInfo(cssFilePath);
-                        }
-                    } else {
-                        fileInfo = new FileInfo(Path.GetFullPath(Path.Combine(cruncher.Options.RootFolder, fileName)));
-                    }
-
+                    
                     // Read the file.
+                    FileInfo fileInfo = new FileInfo(ResourceHelper.GetFilePath(fileName, cruncher.Options.RootFolder, cruncher.Context));
                     if (fileInfo != null && fileInfo.Exists) {
                         string file = fileInfo.FullName;
 

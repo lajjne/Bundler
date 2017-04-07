@@ -49,48 +49,33 @@ namespace Bundler {
                             CacheFiles = true
                         };
 
-                        StyleBundler cssCruncher = new StyleBundler(cruncherOptions, context);
+                        StyleBundler bundler = new StyleBundler(cruncherOptions, context);
 
                         // Expand bundles
-                        paths = ExpandBundles(cssCruncher, paths);
+                        paths = ExpandBundles(bundler, paths);
 
-                        // Loop through and process each file.
+                        // Loop through and process each file
                         foreach (string path in paths) {
-                            // Local files.
                             if (PreprocessorManager.Instance.AllowedExtensionsRegex.IsMatch(path)) {
-                                List<string> files = new List<string>();
-
-                                // Try to get the file by absolute/relative path
-                                if (!ResourceHelper.IsResourceFilenameOnly(path)) {
-                                    string cssFilePath = ResourceHelper.GetFilePath(
-                                        path,
-                                        cruncherOptions.RootFolder,
-                                        context);
-
-                                    if (File.Exists(cssFilePath)) {
-                                        files.Add(cssFilePath);
-                                    }
+                                string filePath = ResourceHelper.GetFilePath(path, cruncherOptions.RootFolder, context);
+                                if (File.Exists(filePath)) {
+                                    cruncherOptions.RootFolder = Path.GetDirectoryName(filePath);
+                                    stringBuilder.Append(await bundler.CrunchAsync(filePath));
                                 }
-
-                                if (files.Any()) {
-                                    // We only want the first file.
-                                    string first = files.FirstOrDefault();
-                                    cruncherOptions.RootFolder = Path.GetDirectoryName(first);
-                                    stringBuilder.Append(await cssCruncher.CrunchAsync(first));
-                                }
-                            } 
+                            }
                         }
 
                         combinedCSS = stringBuilder.ToString();
 
                         // Apply autoprefixer
-                        combinedCSS = cssCruncher.AutoPrefix(combinedCSS, BundlerConfiguration.Instance.AutoPrefixerOptions);
+                        combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerConfiguration.Instance.AutoPrefixerOptions);
 
+                        // Minify
                         if (minify) {
-                            combinedCSS = cssCruncher.Minify(combinedCSS);
+                            combinedCSS = bundler.Minify(combinedCSS);
                         }
 
-                        this.AddItemToCache(key, combinedCSS, cssCruncher.FileMonitors);
+                        this.AddItemToCache(key, combinedCSS, bundler.FileMonitors);
                     }
                 }
             }

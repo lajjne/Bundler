@@ -54,47 +54,30 @@ namespace Bundler {
                             CacheFiles = true
                         };
 
-                        ScriptBundler javaScriptCruncher = new ScriptBundler(cruncherOptions, context);
+                        ScriptBundler bundler = new ScriptBundler(cruncherOptions, context);
 
                         // Expand bundles
-                        paths = ExpandBundles(javaScriptCruncher, paths);
+                        paths = ExpandBundles(bundler, paths);
 
-                        // Loop through and process each file.
+                        // Loop through and process each file
                         foreach (string path in paths) {
-                            // Local files.
                             if (PreprocessorManager.Instance.AllowedExtensionsRegex.IsMatch(path)) {
-                                List<string> files = new List<string>();
-
-                                // Try to get the file using absolute/relative path
-                                if (!ResourceHelper.IsResourceFilenameOnly(path)) {
-                                    string javaScriptFilePath = ResourceHelper.GetFilePath(
-                                        path,
-                                        cruncherOptions.RootFolder,
-                                        context);
-
-                                    if (File.Exists(javaScriptFilePath)) {
-                                        files.Add(javaScriptFilePath);
-                                    }
+                                string filePath = ResourceHelper.GetFilePath(path, cruncherOptions.RootFolder, context);
+                                if (File.Exists(filePath)) {
+                                    cruncherOptions.RootFolder = Path.GetDirectoryName(filePath);
+                                    stringBuilder.Append(await bundler.CrunchAsync(filePath));
                                 }
-
-                                if (files.Any()) {
-                                    // We only want the first file.
-                                    string first = files.FirstOrDefault();
-                                    cruncherOptions.RootFolder = Path.GetDirectoryName(first);
-                                    stringBuilder.Append(await javaScriptCruncher.CrunchAsync(first));
-                                }
-                            } 
-                            
+                            }
                         }
 
                         combinedJavaScript = stringBuilder.ToString();
 
+                        // Minify
                         if (minify) {
-                            // Minify.
-                            combinedJavaScript = javaScriptCruncher.Minify(combinedJavaScript);
+                            combinedJavaScript = bundler.Minify(combinedJavaScript);
                         }
 
-                        this.AddItemToCache(key, combinedJavaScript, javaScriptCruncher.FileMonitors);
+                        this.AddItemToCache(key, combinedJavaScript, bundler.FileMonitors);
                     }
                 }
             }

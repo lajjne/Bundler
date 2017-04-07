@@ -54,31 +54,19 @@ namespace Bundler.Preprocessors.Less {
                     string importedCss = string.Empty;
 
                     if (!fileName.Contains(Uri.SchemeDelimiter)) {
-                        // Check and add the @import the match.
-                        FileInfo fileInfo;
-
-                        // Try to get the file by absolute/relative path
-                        if (!ResourceHelper.IsResourceFilenameOnly(fileName)) {
-                            string cssFilePath = ResourceHelper.GetFilePath(fileName, cruncher.Options.RootFolder, cruncher.Context);
-                            fileInfo = new FileInfo(cssFilePath);
-                        } else {
-                            fileInfo = new FileInfo(Path.GetFullPath(Path.Combine(cruncher.Options.RootFolder, fileName)));
-                        }
 
                         // Read the file.
+                        FileInfo fileInfo = new FileInfo(ResourceHelper.GetFilePath(fileName, cruncher.Options.RootFolder, cruncher.Context));
                         if (fileInfo.Exists) {
                             string file = fileInfo.FullName;
 
                             using (StreamReader reader = new StreamReader(file)) {
                                 // Parse the children.
-                                importedCss = mediaQuery != null
-                                                  ? string.Format(
-                                                      CultureInfo.InvariantCulture,
-                                                      "@media {0}{{{1}{2}{1}}}",
-                                                      mediaQuery,
-                                                      Environment.NewLine,
-                                                      Transform(reader.ReadToEnd(), file, cruncher))
-                                                  : Transform(reader.ReadToEnd(), file, cruncher);
+                                if (mediaQuery != null) {
+                                    importedCss = string.Format(CultureInfo.InvariantCulture, "@media {0}{{{1}{2}{1}}}", mediaQuery, Environment.NewLine, Transform(reader.ReadToEnd(), file, cruncher));
+                                } else {
+                                    importedCss = Transform(reader.ReadToEnd(), file, cruncher);
+                                }
                             }
 
                             // Cache if applicable.

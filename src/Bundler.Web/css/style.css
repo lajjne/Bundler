@@ -1,9 +1,14 @@
-﻿
-body {
-    background: #ff1493;
-}
-
-/*! This comment should be preserved.*/
+﻿/*! This comment should be preserved.*/
 @import url('imports/style2.css');
 
+body {
+    background: #ff1493;
+    background-image: url('../img/arnie.jpg');
+}
+
+
 @import url('/css/imports/style3.css');
+
+h1 {
+    color: #fff;
+}

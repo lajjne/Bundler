@@ -106,6 +106,9 @@
     <None Include="css\style.bundle" />
     <Content Include="css\style.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="img\arnie-conan.jpg" />
+    <Content Include="img\arnie.jpg" />
+    <Content Include="img\css_image.jpg" />
     <Content Include="js\bootstrap3\bootstrap.js" />
     <Content Include="js\bootstrap3\bootstrap.min.js" />
     <Content Include="js\bootstrap4\bootstrap.js" />

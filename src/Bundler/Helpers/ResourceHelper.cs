@@ -24,31 +24,13 @@ namespace Bundler.Helpers {
         /// </summary>
         private static readonly Regex PhysicalFileRegex = new Regex(@"\.(css|js)$", RegexOptions.IgnoreCase);
 
-        /// <summary>
-        /// Get's a value indicating whether the resource is a filename only.
-        /// </summary>
-        /// <param name="resource">
-        /// The resource to test against.
-        /// </param>
-        /// <returns>
-        /// The <see cref="bool"/> indicating whether the resource is a filename only.
-        /// </returns>
-        public static bool IsResourceFilenameOnly(string resource) {
-            return Path.GetFileName(resource) == resource.Trim();
-        }
 
         /// <summary>
         /// Returns the file path to the specified resource.
         /// </summary>
-        /// <param name="resource">
-        /// The resource to return the path for.
-        /// </param>
-        /// <param name="rootPath">
-        /// The root path for the application.
-        /// </param>
-        /// <param name="context">
-        /// The current context.
-        /// </param>
+        /// <param name="resource">The resource to return the path for.</param>
+        /// <param name="rootPath">The root path for the request.</param>
+        /// <param name="context">The current context.</param>
         /// <returns>
         /// The <see cref="string"/> representing the file path to the resource.
         /// </returns>
@@ -260,7 +242,6 @@ namespace Bundler.Helpers {
                         // Delete the file
                         fileInfo.Delete();
                     }
-                    // ReSharper disable once EmptyGeneralCatchClause
                     catch {
                         // Do nothing; skip to the next file.
                     }

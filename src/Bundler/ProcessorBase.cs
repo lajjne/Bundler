@@ -40,35 +40,32 @@ namespace Bundler {
             }
         }
 
+        /// <summary>
+        /// Expand .bundle files
+        /// </summary>
+        /// <param name="bundler"></param>
+        /// <param name="fileNames"></param>
+        /// <returns></returns>
         protected string[] ExpandBundles(BundlerBase bundler, params string[] fileNames) {
-            // Expand bundles
             List<string> paths = new List<string>();
             foreach (var fileName in fileNames) {
                 if (Path.GetExtension(fileName) == ".bundle") {
-                    // Resolve files specified in the bundle
-                    FileInfo fileInfo = null;
-
-                    // Try to get the file by absolute/relative path
-                    if (!ResourceHelper.IsResourceFilenameOnly(fileName)) {
-                        string filePath = ResourceHelper.GetFilePath(fileName, bundler.Options.RootFolder, bundler.Context);
-                        if (File.Exists(filePath)) {
-                            fileInfo = new FileInfo(filePath);
-                        }
-                    } else {
-                        fileInfo = new FileInfo(Path.GetFullPath(Path.Combine(bundler.Options.RootFolder, fileName)));
-                    }
-
-                    // Add the filenames from the bundle
-                    if (fileInfo != null && fileInfo.Exists) {
-                        string file = fileInfo.FullName;
-                        var lines = File.ReadAllLines(file);
-                        bundler.AddFileMonitor(file, string.Join(Environment.NewLine, lines));
+                    string bundleFile = ResourceHelper.GetFilePath(fileName, bundler.Options.RootFolder, bundler.Context);
+                    if (File.Exists(bundleFile)) {
+                        // Add the filenames from the bundle
+                        var lines = File.ReadAllLines(bundleFile);
                         foreach (var line in lines) {
                             if (line.StartsWith("#")) {
                                 continue;
                             }
-                            paths.Add(Path.Combine(fileInfo.DirectoryName, line));
+                            var path = ResourceHelper.GetFilePath(line, Path.GetDirectoryName(bundleFile), bundler.Context);
+                            if (File.Exists(path)) {
+                                paths.Add(path);
+                            }
                         }
+
+                        // Monitor .bundle for changes
+                        bundler.AddFileMonitor(bundleFile, string.Join(Environment.NewLine, lines));
                     }
                 } else {
                     paths.Add(fileName);
