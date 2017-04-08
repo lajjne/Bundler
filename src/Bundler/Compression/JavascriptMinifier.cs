@@ -130,7 +130,7 @@ namespace Bundler.Compression {
                 // Important comments are frequently used by developers to specify copyright or licensing 
                 // information that needs to be retained in distributed scripts.
                 // e.g /*! This is important */
-                codeSettings.PreserveImportantComments = true;
+                codeSettings.PreserveImportantComments = false;
             }
 
             return codeSettings;

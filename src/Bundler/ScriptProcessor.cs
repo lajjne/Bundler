@@ -62,14 +62,21 @@ namespace Bundler {
                                 string filePath = ResourceHelper.GetFilePath(path, null, context);
                                 if (File.Exists(filePath)) {
                                     cruncherOptions.RootFolder = Path.GetDirectoryName(filePath);
-                                     var result = await bundler.ProcessAsync(filePath);
+                                    var result = await bundler.ProcessAsync(filePath);
 
                                     // Minify (unless already minified)
                                     if (minify && !filePath.Contains(".min", StringComparison.OrdinalIgnoreCase)) {
                                         result = bundler.Minify(result);
                                     }
 
+                                    // NOTE: always add semi-colon to avoid problem when combining scripts 
+                                    result = result.TrimEnd();
+                                    if (!result.EndsWith(";")) {
+                                        result += ";";
+                                    }
+
                                     stringBuilder.Append(result);
+
                                 }
                             }
                         }
