@@ -7,7 +7,7 @@ body {
 }
 
 
-@import url('/css/imports/style3.css');
+@import url('/css/imports/style3.min.css');
 
 h1 {
     color: #fff;

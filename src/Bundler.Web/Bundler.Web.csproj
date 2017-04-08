@@ -102,7 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="css\imports\style2.css" />
-    <Content Include="css\imports\style3.css" />
+    <Content Include="css\imports\style3.min.css" />
     <None Include="css\style.bundle" />
     <Content Include="css\style.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
