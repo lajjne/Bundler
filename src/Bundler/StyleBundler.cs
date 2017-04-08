@@ -98,7 +98,7 @@ namespace Bundler {
             // Do the base processing then process any specific code here. 
             input = base.PreProcessInput(input, path);
 
-            // Run the last filter. This should be the resourcePreprocessor.
+            // Run the last filter. This should be the ResourcePreprocessor.
             input = PreprocessorManager.Instance.PreProcessors
                 .First(preprocessor => preprocessor.AllowedExtensions == null)
                 .Transform(input, path, this);

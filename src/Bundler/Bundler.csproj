@@ -84,7 +84,6 @@
     <Compile Include="Postprocessors\AutoPrefixer\CountryStatisticsService.cs" />
     <Compile Include="Preprocessors\Css\CssPreprocessor.cs" />
     <Compile Include="Preprocessors\IPreprocessor.cs" />
-    <Compile Include="Preprocessors\Javascript\JavascriptPreprocessor.cs" />
     <Compile Include="Preprocessors\Less\LessCompilingException.cs" />
     <Compile Include="Preprocessors\Less\LessPathResolver.cs" />
     <Compile Include="Preprocessors\Less\LessPreprocessor.cs" />

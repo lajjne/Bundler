@@ -77,7 +77,7 @@ namespace Bundler {
             }
 
             // Expand .bundle files
-            fileNames = ResourceHelper.ExpandBundles(context, false, fileNames);
+            fileNames = ResourceHelper.ExpandBundles(context, false, null, fileNames);
 
             // Render files separately and unminified for debug mode.
             foreach (string name in fileNames) {
@@ -143,7 +143,7 @@ namespace Bundler {
             }
 
             // Expand .bundle files
-            fileNames = ResourceHelper.ExpandBundles(context, false, fileNames);
+            fileNames = ResourceHelper.ExpandBundles(context, false, null, fileNames);
 
             // Render them separately and unminified for debug mode.
             foreach (string name in fileNames) {

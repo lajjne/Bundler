@@ -21,7 +21,7 @@ namespace Bundler.Preprocessors.Less {
         /// <summary>
         /// Gets the extension that this filter processes.
         /// </summary>
-        public string[] AllowedExtensions => new[] { ".CSS" };
+        public string[] AllowedExtensions => new[] { ".css" };
 
         /// <summary>
         /// Parses the string for CSS imports and replaces them with the referenced CSS.
@@ -66,6 +66,13 @@ namespace Bundler.Preprocessors.Less {
                                     importedCss = string.Format(CultureInfo.InvariantCulture, "@media {0}{{{1}{2}{1}}}", mediaQuery, Environment.NewLine, Transform(reader.ReadToEnd(), file, cruncher));
                                 } else {
                                     importedCss = Transform(reader.ReadToEnd(), file, cruncher);
+
+                                    // Run the last filter. This should be the ResourcePreprocessor.
+                                    importedCss = PreprocessorManager.Instance.PreProcessors
+                                        .First(preprocessor => preprocessor.AllowedExtensions == null)
+                                        .Transform(input, path, cruncher);
+
+
                                 }
                             }
 

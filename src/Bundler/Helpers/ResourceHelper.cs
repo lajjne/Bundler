@@ -29,37 +29,41 @@ namespace Bundler.Helpers {
         /// </summary>
         /// <param name="bundler"></param>
         /// <param name="keepBundle"></param>
+        /// <param name="rootPath"></param>
         /// <param name="fileNames"></param>
         /// <returns></returns>
-        public static string[] ExpandBundles(HttpContext context, bool keepBundle, params string[] fileNames) {
+        public static string[] ExpandBundles(HttpContext context, bool keepBundle, string rootPath, params string[] fileNames) {
             if (fileNames.Any(x => Path.GetExtension(x) == ".bundle")) {
                 List<string> paths = new List<string>();
                 foreach (var fileName in fileNames) {
                     if (Path.GetExtension(fileName) == ".bundle") {
                         string bundleFile = null;
                         if (keepBundle) {
-                            bundleFile = ResourceHelper.GetFilePath(fileName, Path.GetDirectoryName(context.Request.FilePath), context);
+                            bundleFile = ResourceHelper.GetFilePath(fileName, rootPath, context);
                             paths.Add(bundleFile);
                         }
 
                         string key = fileName.ToMd5Fingerprint();
-                        string[] bundleFiles = CacheManager.GetItem(key) as string[];
+                        List<string> bundleFiles = CacheManager.GetItem(key) as List<string>;
                         if (bundleFiles == null) {
-                            bundleFile = bundleFile ?? ResourceHelper.GetFilePath(fileName, Path.GetDirectoryName(context.Request.FilePath), context);
+                            bundleFile = bundleFile ?? ResourceHelper.GetFilePath(fileName, rootPath, context);
                             if (File.Exists(bundleFile)) {
-                                var dir = Path.GetDirectoryName(bundleFile);
                                 // Add the filenames from the bundle
-                                bundleFiles = File.ReadAllLines(bundleFile);
-                                for (int i = 0; i < bundleFiles.Length; i++) {
-                                    if (bundleFiles[i].StartsWith("#")) {
-                                        bundleFiles[i] = null;
+                                bundleFiles = new List<string>();
+                                var lines = File.ReadAllLines(bundleFile);
+                                var dir = Path.GetDirectoryName(bundleFile);
+                                for (int i = 0; i < lines.Length; i++) {
+                                    if (lines[i].StartsWith("#")) {
+                                        // Comment
+                                        continue;
+                                    } else if (Path.GetExtension(lines[i]) == ".bundle") {
+                                        // Resolve nested bundle
+                                        var nestedBundle = ResourceHelper.GetFilePath(lines[i], dir, context);
+                                        bundleFiles.AddRange(ExpandBundles(context, keepBundle, Path.GetDirectoryName(nestedBundle), nestedBundle));
                                     } else {
-                                        bundleFiles[i] = ResourceHelper.GetFilePath(bundleFiles[i], dir, context);
+                                        bundleFiles.Add(ResourceHelper.GetFilePath(lines[i], dir, context));
                                     }
                                 }
-
-                                // Remove null paths
-                                bundleFiles = bundleFiles.Where(x => x != null).ToArray();
 
                                 // Cache content of bundle
                                 CacheItemPolicy cacheItemPolicy = new CacheItemPolicy { Priority = CacheItemPriority.NotRemovable };
@@ -84,7 +88,7 @@ namespace Bundler.Helpers {
         /// Returns the file path to the specified resource.
         /// </summary>
         /// <param name="resource">The resource to return the path for.</param>
-        /// <param name="rootPath">The root path for the request.</param>
+        /// <param name="rootPath">The root path to use when resolving file path for the specified resource.</param>
         /// <param name="context">The current context.</param>
         /// <returns>
         /// The <see cref="string"/> representing the file path to the resource.
@@ -106,9 +110,9 @@ namespace Bundler.Helpers {
                             return resource;
                         }
 
-                        // If it is a relative path then combines the request's path with the resource's path
+                        // If it is a relative path then combine the root path with the resource's path
                         if (!Path.IsPathRooted(resource)) {
-                            return Path.GetFullPath(Path.Combine(rootPath, resource));
+                            return Path.GetFullPath(Path.Combine(rootPath ?? Path.GetDirectoryName(context.Request.FilePath), resource));
                         }
 
                         // It is an absolute path

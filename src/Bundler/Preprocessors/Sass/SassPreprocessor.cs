@@ -9,7 +9,7 @@ namespace Bundler.Preprocessors.Sass {
         /// <summary>
         /// Gets the extensions that this filter processes.
         /// </summary>
-        public string[] AllowedExtensions => new[] { ".SASS", ".SCSS" };
+        public string[] AllowedExtensions => new[] { ".sass", ".scss" };
 
         /// <summary>
         /// Transforms the content of the given string.

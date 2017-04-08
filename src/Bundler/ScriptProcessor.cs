@@ -57,7 +57,7 @@ namespace Bundler {
                         ScriptBundler bundler = new ScriptBundler(cruncherOptions, context);
 
                         // Expand .bundle files
-                        paths = ResourceHelper.ExpandBundles(context, true, paths);
+                        paths = ResourceHelper.ExpandBundles(context, true, null, paths);
 
                         // Loop through and process each file
                         foreach (string path in paths) {
@@ -69,7 +69,7 @@ namespace Bundler {
                             }
 
                             if (PreprocessorManager.Instance.AllowedExtensionsRegex.IsMatch(path)) {
-                                string filePath = ResourceHelper.GetFilePath(path, cruncherOptions.RootFolder, context);
+                                string filePath = ResourceHelper.GetFilePath(path, null, context);
                                 if (File.Exists(filePath)) {
                                     cruncherOptions.RootFolder = Path.GetDirectoryName(filePath);
                                     stringBuilder.Append(await bundler.CrunchAsync(filePath));

@@ -18,7 +18,7 @@ namespace Bundler.Preprocessors.Less {
         /// <summary>
         /// Gets the extension that this filter processes.
         /// </summary>
-        public string[] AllowedExtensions => new[] { ".LESS" };
+        public string[] AllowedExtensions => new[] { ".less" };
 
         /// <summary>
         /// Transforms the content of the given string from Less into CSS. 
