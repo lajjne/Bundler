@@ -133,14 +133,14 @@ namespace Bundler.Preprocessors {
         /// Generates a Regex with a list of allowed file type extensions.
         /// </summary>
         private void CreateAllowedExtensionRegex() {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder(@"\.js|");
 
             foreach (IPreprocessor preprocessor in this.PreProcessors) {
                 string[] extensions = preprocessor.AllowedExtensions;
 
                 if (extensions != null) {
                     foreach (string extension in extensions) {
-                        stringBuilder.AppendFormat(@"\{0}|", extension.ToUpperInvariant());
+                        stringBuilder.AppendFormat(@"\{0}|", extension.ToLowerInvariant());
                     }
                 }
             }

@@ -145,8 +145,7 @@ namespace Bundler {
 
             // Render them separately and unminified for debug mode.
             foreach (string name in fileNames) {
-                string currentName = name;
-                string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, false, currentName));
+                string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, false, name));
                 if (!string.IsNullOrWhiteSpace(fileContent)) {
                     string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.js";
                     stringBuilder.AppendFormat(

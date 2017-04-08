@@ -112,7 +112,11 @@ namespace Bundler.Helpers {
 
                         // If it is a relative path then combine the root path with the resource's path
                         if (!Path.IsPathRooted(resource)) {
-                            return Path.GetFullPath(Path.Combine(rootPath ?? Path.GetDirectoryName(context.Request.FilePath), resource));
+                            if (resource.StartsWith("~")) {
+                                return HostingEnvironment.MapPath(resource);
+                            } else {
+                                return Path.GetFullPath(Path.Combine(rootPath ?? Path.GetDirectoryName(context.Request.PhysicalPath), resource));
+                            }
                         }
 
                         // It is an absolute path
