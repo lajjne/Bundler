@@ -70,7 +70,7 @@ namespace Bundler.Preprocessors.Less {
                                     // Run the last filter. This should be the ResourcePreprocessor.
                                     importedCss = PreprocessorManager.Instance.PreProcessors
                                         .First(preprocessor => preprocessor.AllowedExtensions == null)
-                                        .Transform(input, path, cruncher);
+                                        .Transform(importedCss, file, cruncher);
 
 
                                 }

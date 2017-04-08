@@ -45,7 +45,6 @@ namespace Bundler.Preprocessors {
         /// <returns>The css content wit the paths replaced.</returns>
         private static string ReplaceRelativePathsIn(string css, string oldPath, string newPath) {
             Regex regex = new Regex(@"url\(\s*[""']{0,1}" + Regex.Escape(oldPath) + @"[""']{0,1}\s*\)", RegexOptions.IgnoreCase);
-
             return regex.Replace(css, match => match.Value.Replace(oldPath, newPath));
         }
 
