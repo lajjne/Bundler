@@ -1,10 +1,8 @@
 ﻿using Bundler.Extensions;
 using Bundler.Helpers;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
-using System.Web.Hosting;
 
 namespace Bundler {
 
