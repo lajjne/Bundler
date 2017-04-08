@@ -74,10 +74,10 @@ namespace Bundler {
                         // Apply autoprefixer
                         combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerConfiguration.Instance.AutoPrefixerOptions);
 
-                        // Minify
-                        if (minify) {
-                            combinedCSS = bundler.Minify(combinedCSS);
-                        }
+                        //// Minify
+                        //if (minify) {
+                        //    combinedCSS = bundler.Minify(combinedCSS);
+                        //}
 
                         this.AddItemToCache(key, combinedCSS, bundler.FileMonitors);
                     }

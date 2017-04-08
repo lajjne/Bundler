@@ -22,17 +22,15 @@ namespace Bundler.Preprocessors.Sass {
             try {
                 var options = new LibSass.Compiler.Options.SassOptions {
                     InputPath = path,
-                    OutputStyle = LibSass.Compiler.Options.SassOutputStyle.Expanded,
+                    OutputStyle = cruncher.Options.Minify ? LibSass.Compiler.Options.SassOutputStyle.Compressed : LibSass.Compiler.Options.SassOutputStyle.Expanded,
                     Precision = 5,
                     IsIndentedSyntax = System.IO.Path.GetExtension(path).Equals(".sass", StringComparison.OrdinalIgnoreCase)
                 };
                 var compiler = new LibSass.Compiler.SassCompiler(options);
                 var result = compiler.Compile();
-
                 foreach (var file in result.IncludedFiles) {
                     cruncher.AddFileMonitor(file, "not empty");
                 }
-
                 return result.Output;
             } catch (Exception ex) {
                 throw new SassAndScssCompilingException(ex.Message, ex.InnerException);

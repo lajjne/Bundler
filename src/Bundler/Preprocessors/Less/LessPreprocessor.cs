@@ -1,4 +1,5 @@
 ﻿using dotless.Core;
+using dotless.Core.configuration;
 using dotless.Core.Importers;
 using dotless.Core.Input;
 using dotless.Core.Parser;
@@ -33,22 +34,18 @@ namespace Bundler.Preprocessors.Less {
             LessPathResolver dotLessPathResolver = new LessPathResolver(path);
             FileReader fileReader = new FileReader(dotLessPathResolver);
             parser.Importer = new Importer(fileReader);
-            ILessEngine lessEngine = new LessEngine(parser);
+            ILessEngine lessEngine = new LessEngine(parser) { Compress = cruncher.Options.Minify };
 
             try {
                 string result = lessEngine.TransformToCss(input, path);
-
                 if (cruncher.Options.CacheFiles) {
                     // Add each import as a file dependency so that the cache will clean itself.
                     IEnumerable<string> imports = lessEngine.GetImports();
                     IList<string> enumerable = imports as IList<string> ?? imports.ToList();
-
                     if (enumerable.Any()) {
                         foreach (string import in enumerable) {
                             if (!import.Contains(Uri.SchemeDelimiter)) {
-                                string filePath =
-                                    HostingEnvironment.MapPath(VirtualPathUtility.Combine(dotLessPathResolver.CurrentFileDirectory, import));
-
+                                string filePath = HostingEnvironment.MapPath(VirtualPathUtility.Combine(dotLessPathResolver.CurrentFileDirectory, import));
                                 cruncher.AddFileMonitor(filePath, "not empty");
                             }
                         }
