@@ -90,7 +90,11 @@ namespace Bundler.Compression {
                         cssSettings.ColorNames = CssColor.Major;
                         break;
                 }
+
+                // Do not keep any comments
+                cssSettings.CommentMode = CssComment.None;
             }
+
 
             return cssSettings;
         }
