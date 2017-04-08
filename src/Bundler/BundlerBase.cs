@@ -21,11 +21,6 @@ namespace Bundler {
         private readonly HttpContext context;
 
         /// <summary>
-        /// The remote regex.
-        /// </summary>
-        private static readonly Regex RemoteRegex = new Regex(@"^http(s?)://", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="BundlerBase"/> class.
         /// </summary>
         /// <param name="options">The options containing instructions for the bundler.</param>
@@ -55,20 +50,12 @@ namespace Bundler {
         public ConcurrentBag<string> FileMonitors { get; set; }
 
         /// <summary>
-        /// Bundles the specified resource.
+        /// Process the specified resource.
         /// </summary>
         /// <param name="resource">The file or folder containing the resource(s) to bundle.</param>
         /// <returns>The bundled resource.</returns>
-        public async Task<string> CrunchAsync(string resource) {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            if (this.IsValidPath(resource)) {
-                stringBuilder.Append(await this.LoadLocalFolderAsync(resource));
-            } else {
-                stringBuilder.Append(await this.LoadLocalFileAsync(resource));
-            }
-
-            return stringBuilder.ToString();
+        public async Task<string> ProcessAsync(string resource) {
+            return await this.LoadFileAsync(resource);
         }
 
         /// <summary>
@@ -99,7 +86,7 @@ namespace Bundler {
         /// </summary>
         /// <param name="file">The file to load.</param>
         /// <returns>The contents of the local file as a string.</returns>
-        protected virtual async Task<string> LoadLocalFileAsync(string file) {
+        protected virtual async Task<string> LoadFileAsync(string file) {
             string contents = string.Empty;
 
             if (this.IsValidFile(file)) {
@@ -128,23 +115,6 @@ namespace Bundler {
         }
 
         /// <summary>
-        /// Loads the local folder.
-        /// </summary>
-        /// <param name="folder">The folder to load resources from.</param>
-        /// <returns>The contents of the resources in the folder as a string.</returns>
-        private async Task<string> LoadLocalFolderAsync(string folder) {
-            StringBuilder stringBuilder = new StringBuilder();
-            DirectoryInfo directoryInfo = new DirectoryInfo(folder);
-
-            foreach (FileInfo fileInfo in await directoryInfo.EnumerateFilesAsync("*", SearchOption.AllDirectories)) {
-                stringBuilder.Append(await this.LoadLocalFileAsync(fileInfo.FullName));
-            }
-
-            return stringBuilder.ToString();
-        }
-
-
-        /// <summary>
         /// Determines whether the current resource is a valid file.
         /// </summary>
         /// <param name="resource">The file or folder containing the resource(s) to check.</param>
@@ -154,19 +124,5 @@ namespace Bundler {
         private bool IsValidFile(string resource) {
             return PreprocessorManager.Instance.AllowedExtensionsRegex.IsMatch(resource) && File.Exists(resource);
         }
-
-        /// <summary>
-        /// Determines whether the current resource is a valid path.
-        /// </summary>
-        /// <param name="resource">The file or folder containing the resource(s) to check.</param>
-        /// <returns>
-        ///   <c>true</c> if the current resource is a valid path; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsValidPath(string resource) {
-            return resource.Contains("\\") && Directory.Exists(resource);
-        }
-
-
-
     }
 }

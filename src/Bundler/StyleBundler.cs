@@ -76,8 +76,8 @@ namespace Bundler {
         /// <returns>
         /// The contents of the local file as a string.
         /// </returns>
-        protected override async Task<string> LoadLocalFileAsync(string file) {
-            string contents = await base.LoadLocalFileAsync(file);
+        protected override async Task<string> LoadFileAsync(string file) {
+            string contents = await base.LoadFileAsync(file);
 
             // Preprocess
             contents = this.PreProcessInput(contents, file);

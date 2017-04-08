@@ -83,11 +83,6 @@ namespace Bundler.Preprocessors.Less {
                 }
             }
 
-            // Minify (unless already minified)
-            if (cruncher.Options.Minify && !path.Contains(".min", StringComparison.OrdinalIgnoreCase)) {
-                input = cruncher.Minify(input);
-            }
-
             return input;
         }
     }

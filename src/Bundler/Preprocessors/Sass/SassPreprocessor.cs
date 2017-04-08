@@ -20,9 +20,10 @@ namespace Bundler.Preprocessors.Sass {
         /// <returns>The transformed string.</returns>
         public string Transform(string input, string path, BundlerBase cruncher) {
             try {
+                // NOTE: ScriptProcessor minifies the compiled css if needed
                 var options = new LibSass.Compiler.Options.SassOptions {
                     InputPath = path,
-                    OutputStyle = cruncher.Options.Minify ? LibSass.Compiler.Options.SassOutputStyle.Compressed : LibSass.Compiler.Options.SassOutputStyle.Expanded,
+                    OutputStyle = LibSass.Compiler.Options.SassOutputStyle.Expanded,
                     Precision = 5,
                     IsIndentedSyntax = System.IO.Path.GetExtension(path).Equals(".sass", StringComparison.OrdinalIgnoreCase)
                 };

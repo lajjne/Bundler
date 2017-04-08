@@ -9,19 +9,14 @@
         public bool Minify { get; set; }
 
         /// <summary>
-        /// Gets or sets the minify cache key.
+        /// Gets or sets the root folder.
         /// </summary>
-        public string MinifyCacheKey { get; set; }
+        public string RootFolder { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to cache files.
         /// </summary>
         public bool CacheFiles { get; set; }
-       
 
-        /// <summary>
-        /// Gets or sets the root folder.
-        /// </summary>
-        public string RootFolder { get; set; }
     }
 }

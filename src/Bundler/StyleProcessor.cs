@@ -3,6 +3,7 @@ using Bundler.Configuration;
 using Bundler.Extensions;
 using Bundler.Helpers;
 using Bundler.Preprocessors;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,10 +39,7 @@ namespace Bundler {
                     combinedCSS = (string)CacheManager.GetItem(key);
 
                     if (string.IsNullOrWhiteSpace(combinedCSS)) {
-                        StringBuilder stringBuilder = new StringBuilder();
-
                         BundlerOptions cruncherOptions = new BundlerOptions {
-                            MinifyCacheKey = key,
                             Minify = minify,
                             CacheFiles = true
                         };
@@ -52,6 +50,7 @@ namespace Bundler {
                         paths = ResourceHelper.ExpandBundles(context, true, null, paths);
 
                         // Loop through and process each file
+                        StringBuilder stringBuilder = new StringBuilder();
                         foreach (string path in paths) {
 
                             // Monitor .bundle file
@@ -64,7 +63,14 @@ namespace Bundler {
                                 string filePath = ResourceHelper.GetFilePath(path, cruncherOptions.RootFolder, context);
                                 if (File.Exists(filePath)) {
                                     cruncherOptions.RootFolder = Path.GetDirectoryName(filePath);
-                                    stringBuilder.Append(await bundler.CrunchAsync(filePath));
+                                    var result = await bundler.ProcessAsync(filePath);
+
+                                    // Minify (unless already minified)
+                                    if (minify && !filePath.Contains(".min", StringComparison.OrdinalIgnoreCase)) {
+                                        result = bundler.Minify(result);
+                                    }
+
+                                    stringBuilder.Append(result);
                                 }
                             }
                         }
@@ -73,11 +79,6 @@ namespace Bundler {
 
                         // Apply autoprefixer
                         combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerConfiguration.Instance.AutoPrefixerOptions);
-
-                        //// Minify
-                        //if (minify) {
-                        //    combinedCSS = bundler.Minify(combinedCSS);
-                        //}
 
                         this.AddItemToCache(key, combinedCSS, bundler.FileMonitors);
                     }

@@ -34,7 +34,8 @@ namespace Bundler.Preprocessors.Less {
             LessPathResolver dotLessPathResolver = new LessPathResolver(path);
             FileReader fileReader = new FileReader(dotLessPathResolver);
             parser.Importer = new Importer(fileReader);
-            ILessEngine lessEngine = new LessEngine(parser) { Compress = cruncher.Options.Minify };
+            // NOTE: ScriptProcessor minifies the compiled css if needed
+            ILessEngine lessEngine = new LessEngine(parser) { Compress = false };
 
             try {
                 string result = lessEngine.TransformToCss(input, path);

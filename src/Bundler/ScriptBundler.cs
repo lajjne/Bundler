@@ -30,11 +30,11 @@ namespace Bundler {
         /// <summary>
         /// Minifies the specified resource.
         /// </summary>
-        /// <param name="resource">The resource.</param>
+        /// <param name="script">The script to minify.</param>
         /// <returns>
         /// The minified resource.
         /// </returns>
-        public override string Minify(string resource) {
+        public override string Minify(string script) {
             JavaScriptMinifier minifier;
 
             if (this.Options.Minify) {
@@ -49,7 +49,7 @@ namespace Bundler {
                 };
             }
 
-            return minifier.Minify(resource);
+            return minifier.Minify(script);
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace Bundler {
         /// <returns>
         /// The contents of the local file as a string.
         /// </returns>
-        protected override async Task<string> LoadLocalFileAsync(string file) {
-            string contents = await base.LoadLocalFileAsync(file);
+        protected override async Task<string> LoadFileAsync(string file) {
+            string contents = await base.LoadFileAsync(file);
 
             contents = this.PreProcessInput(contents, file);
 
