@@ -293,6 +293,7 @@
     <Content Include="Views\Home\Bootstrap3.cshtml" />
     <Content Include="Views\Home\Bootstrap4.cshtml" />
     <Content Include="Views\Home\Bundled.cshtml" />
+    <Content Include="css\style2.bundle" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
