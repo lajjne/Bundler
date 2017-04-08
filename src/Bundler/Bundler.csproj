@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bundle.cs" />
+    <Compile Include="BundleOptions.cs" />
     <Compile Include="BundlerBase.cs" />
     <Compile Include="BundlerOptions.cs" />
     <Compile Include="Caching\CacheManager.cs" />
