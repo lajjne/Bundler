@@ -51,6 +51,9 @@ namespace Bundler {
 
                         StyleBundler bundler = new StyleBundler(cruncherOptions, context);
 
+                        // Expand .bundle files
+                        paths = ResourceHelper.ExpandBundles(context, true, paths);
+
                         // Loop through and process each file
                         foreach (string path in paths) {
 

@@ -65,10 +65,7 @@ namespace Bundler {
             StringBuilder stringBuilder = new StringBuilder();
             HttpContext context = HttpContext.Current;
 
-            // Expand .bundle files
-            fileNames = ResourceHelper.ExpandBundles(context, fileNames);
-
-            // Minify on release.
+            // Combine and Minify on release.
             if (!context.IsDebuggingEnabled) {
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, true, fileNames));
                 if (!string.IsNullOrWhiteSpace(fileContent)) {
@@ -79,10 +76,12 @@ namespace Bundler {
                 }
             }
 
-            // Render them separately for debug mode.
+            // Expand .bundle files
+            fileNames = ResourceHelper.ExpandBundles(context, false, fileNames);
+
+            // Render files separately and unminified for debug mode.
             foreach (string name in fileNames) {
-                string currentName = name;
-                string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, false, currentName));
+                string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, false, name));
                 if (!string.IsNullOrWhiteSpace(fileContent)) {
                     string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}.css";
                     stringBuilder.AppendFormat(CssPhysicalFileTemplate,
@@ -126,9 +125,6 @@ namespace Bundler {
             StringBuilder stringBuilder = new StringBuilder();
             HttpContext context = HttpContext.Current;
 
-            // Expand .bundle files
-            fileNames = ResourceHelper.ExpandBundles(context, fileNames);
-
             string behaviourParam = behaviour == JavaScriptLoadBehaviour.Inline ? string.Empty : " " + behaviour.ToString().ToLowerInvariant();
 
             // Minify on release.
@@ -146,7 +142,10 @@ namespace Bundler {
                 }
             }
 
-            // Render them separately for debug mode.
+            // Expand .bundle files
+            fileNames = ResourceHelper.ExpandBundles(context, false, fileNames);
+
+            // Render them separately and unminified for debug mode.
             foreach (string name in fileNames) {
                 string currentName = name;
                 string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, false, currentName));

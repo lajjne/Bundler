@@ -28,77 +28,57 @@ namespace Bundler.Helpers {
         /// Expand .bundle files
         /// </summary>
         /// <param name="bundler"></param>
+        /// <param name="keepBundle"></param>
         /// <param name="fileNames"></param>
         /// <returns></returns>
-        public static string[] ExpandBundles(HttpContext context, params string[] fileNames) {
-            List<string> paths = new List<string>();
-
-            foreach (var fileName in fileNames) {
-                paths.Add(fileName);
-                if (Path.GetExtension(fileName) == ".bundle") {
-                    string bundleFile = ResourceHelper.GetFilePath(fileName, Path.GetDirectoryName(context.Request.FilePath), context);
-                    if (File.Exists(bundleFile)) {
-                        string key = bundleFile.ToMd5Fingerprint();
-                        string[] lines = CacheManager.GetItem(key) as string[];
-                        if (lines == null) {
-                            // Add the filenames from the bundle
-                            lines = File.ReadAllLines(bundleFile);
-
-                            // Cache content of bundle
-                            CacheItemPolicy cacheItemPolicy = new CacheItemPolicy { Priority = CacheItemPriority.NotRemovable };
-                            cacheItemPolicy.ChangeMonitors.Add(new HostFileChangeMonitor(new string[] { bundleFile }));
-                            CacheManager.AddItem(key, lines, cacheItemPolicy);
+        public static string[] ExpandBundles(HttpContext context, bool keepBundle, params string[] fileNames) {
+            if (fileNames.Any(x => Path.GetExtension(x) == ".bundle")) {
+                List<string> paths = new List<string>();
+                foreach (var fileName in fileNames) {
+                    if (Path.GetExtension(fileName) == ".bundle") {
+                        string bundleFile = null;
+                        if (keepBundle) {
+                            bundleFile = ResourceHelper.GetFilePath(fileName, Path.GetDirectoryName(context.Request.FilePath), context);
+                            paths.Add(bundleFile);
                         }
 
-                        // Add the filenames from the bundle
-                        foreach (var line in lines) {
-                            if (line.StartsWith("#")) {
-                                continue;
-                            }
-                            var path = ResourceHelper.GetFilePath(line, Path.GetDirectoryName(bundleFile), context);
-                            if (File.Exists(path)) {
-                                paths.Add(path);
+                        string key = fileName.ToMd5Fingerprint();
+                        string[] bundleFiles = CacheManager.GetItem(key) as string[];
+                        if (bundleFiles == null) {
+                            bundleFile = bundleFile ?? ResourceHelper.GetFilePath(fileName, Path.GetDirectoryName(context.Request.FilePath), context);
+                            if (File.Exists(bundleFile)) {
+                                var dir = Path.GetDirectoryName(bundleFile);
+                                // Add the filenames from the bundle
+                                bundleFiles = File.ReadAllLines(bundleFile);
+                                for (int i = 0; i < bundleFiles.Length; i++) {
+                                    if (bundleFiles[i].StartsWith("#")) {
+                                        bundleFiles[i] = null;
+                                    } else {
+                                        bundleFiles[i] = ResourceHelper.GetFilePath(bundleFiles[i], dir, context);
+                                    }
+                                }
+
+                                // Remove null paths
+                                bundleFiles = bundleFiles.Where(x => x != null).ToArray();
+
+                                // Cache content of bundle
+                                CacheItemPolicy cacheItemPolicy = new CacheItemPolicy { Priority = CacheItemPriority.NotRemovable };
+                                cacheItemPolicy.ChangeMonitors.Add(new HostFileChangeMonitor(new string[] { bundleFile }));
+                                CacheManager.AddItem(key, bundleFiles, cacheItemPolicy);
                             }
                         }
+                        if (bundleFiles != null) {
+                            paths.AddRange(bundleFiles);
+                        }
+                    } else {
+                        paths.Add(fileName);
                     }
-                } 
+                }
+                fileNames = paths.ToArray();
             }
-            return paths.ToArray();
+
+            return fileNames;
         }
-
-        ///// <summary>
-        ///// Expand .bundle files
-        ///// </summary>
-        ///// <param name="bundler"></param>
-        ///// <param name="fileNames"></param>
-        ///// <returns></returns>
-        //public static string[] ExpandBundles(BundlerBase bundler, params string[] fileNames) {
-        //    List<string> paths = new List<string>();
-        //    foreach (var fileName in fileNames) {
-        //        if (Path.GetExtension(fileName) == ".bundle") {
-        //            string bundleFile = ResourceHelper.GetFilePath(fileName, bundler.Options.RootFolder, bundler.Context);
-        //            if (File.Exists(bundleFile)) {
-        //                // Add the filenames from the bundle
-        //                var lines = File.ReadAllLines(bundleFile);
-        //                foreach (var line in lines) {
-        //                    if (line.StartsWith("#")) {
-        //                        continue;
-        //                    }
-        //                    var path = ResourceHelper.GetFilePath(line, Path.GetDirectoryName(bundleFile), bundler.Context);
-        //                    if (File.Exists(path)) {
-        //                        paths.Add(path);
-        //                    }
-        //                }
-
-        //                // Monitor .bundle for changes
-        //                bundler.AddFileMonitor(bundleFile, string.Join(Environment.NewLine, lines));
-        //            }
-        //        } else {
-        //            paths.Add(fileName);
-        //        }
-        //    }
-        //    return paths.ToArray();
-        //}
 
         /// <summary>
         /// Returns the file path to the specified resource.

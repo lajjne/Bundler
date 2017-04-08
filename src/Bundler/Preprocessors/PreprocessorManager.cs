@@ -133,7 +133,7 @@ namespace Bundler.Preprocessors {
         /// Generates a Regex with a list of allowed file type extensions.
         /// </summary>
         private void CreateAllowedExtensionRegex() {
-            StringBuilder stringBuilder = new StringBuilder(@"\.CSS|\.JS|");
+            StringBuilder stringBuilder = new StringBuilder();
 
             foreach (IPreprocessor preprocessor in this.PreProcessors) {
                 string[] extensions = preprocessor.AllowedExtensions;
