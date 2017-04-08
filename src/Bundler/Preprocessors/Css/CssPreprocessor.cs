@@ -66,15 +66,13 @@ namespace Bundler.Preprocessors.Less {
                                     importedCss = string.Format(CultureInfo.InvariantCulture, "@media {0}{{{1}{2}{1}}}", mediaQuery, Environment.NewLine, Transform(reader.ReadToEnd(), file, cruncher));
                                 } else {
                                     importedCss = Transform(reader.ReadToEnd(), file, cruncher);
-
-                                    // Run the last filter. This should be the ResourcePreprocessor.
-                                    importedCss = PreprocessorManager.Instance.PreProcessors
-                                        .First(preprocessor => preprocessor.AllowedExtensions == null)
-                                        .Transform(importedCss, file, cruncher);
-
-
                                 }
                             }
+
+                            // Run the last filter. This should be the ResourcePreprocessor.
+                            importedCss = PreprocessorManager.Instance.PreProcessors
+                                .First(preprocessor => preprocessor.AllowedExtensions == null)
+                                .Transform(importedCss, file, cruncher);
 
                             // Cache if applicable.
                             cruncher.AddFileMonitor(file, importedCss);
