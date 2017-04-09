@@ -14,17 +14,14 @@ namespace Bundler.Configuration {
 
         private static BundlerConfig _current;
 
-        private readonly string _physicalFilesPath;
-        private readonly int _physicalFilesDaysBeforeRemoveExpired;
-        private readonly AutoPrefixerOptions _autoPrefixerOptions;
 
         /// <summary>
         /// Initialize a new instance of the <see cref="BundlerConfig"/> class.
         /// </summary>
         public BundlerConfig() {
-            _physicalFilesPath = "~/bundles";
-            _physicalFilesDaysBeforeRemoveExpired = 7;
-            _autoPrefixerOptions = new AutoPrefixerOptions() {
+            PhysicalFilesPath = "~/bundles";
+            PhysicalFilesDaysBeforeRemoveExpired = 7;
+            AutoPrefixerOptions = new AutoPrefixerOptions() {
                 Enabled = true,
                 Browsers = new string[] { "last 2 versions" }
             };
@@ -57,27 +54,16 @@ namespace Bundler.Configuration {
         /// <summary>
         /// Gets the directory's path where to store physical files
         /// </summary>
-        public string PhysicalFilesPath {
-            get {
-                return _physicalFilesPath;
-            }
-        }
+        public string PhysicalFilesPath { get; set; }
 
         /// <summary>
         /// Gets the number of days to keep physical files
         /// </summary>
-        public int PhysicalFilesDaysBeforeRemoveExpired {
-            get {
-                return _physicalFilesDaysBeforeRemoveExpired;
-            }
-        }
+        public int PhysicalFilesDaysBeforeRemoveExpired { get; set; }
+
         /// <summary>
         /// Gets the auto prefixer options.
         /// </summary>
-        public AutoPrefixerOptions AutoPrefixerOptions {
-            get {
-                return _autoPrefixerOptions;
-            }
-        }
+        public AutoPrefixerOptions AutoPrefixerOptions { get; set; }
     }
 }
