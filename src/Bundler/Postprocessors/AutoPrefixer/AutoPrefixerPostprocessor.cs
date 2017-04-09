@@ -1,4 +1,5 @@
 ﻿using Bundler.Configuration;
+using JavaScriptEngineSwitcher.Core;
 
 namespace Bundler.Postprocessors.AutoPrefixer {
 
@@ -25,9 +26,10 @@ namespace Bundler.Postprocessors.AutoPrefixer {
                 return input;
             }
 
-            using (AutoPrefixerProcessor processor = new AutoPrefixerProcessor(BundlerConfiguration.Instance.JsEngineFunc)) {
+            using (AutoPrefixerProcessor processor = new AutoPrefixerProcessor()) {
                 input = processor.Process(input, options);
             }
+
 
             return input;
         }

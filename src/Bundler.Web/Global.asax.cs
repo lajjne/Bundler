@@ -1,4 +1,5 @@
-﻿using JavaScriptEngineSwitcher.Core;
+﻿using Bundler.Configuration;
+using JavaScriptEngineSwitcher.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Bundler.Web {
         protected void Application_Start() {
             AreaRegistration.RegisterAllAreas();
             JsEngineSwitcherConfig.Configure(JsEngineSwitcher.Instance);
+            BundlerConfig.Configure(new BundlerConfig());
             RouteConfig.RegisterRoutes(RouteTable.Routes);
         }
     }

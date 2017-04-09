@@ -4,7 +4,7 @@
     /// </summary>
     public class BundlerOptions {
         /// <summary>
-        /// Gets or sets a value indicating whether to minify the file.
+        /// Gets or sets a value indicating whether to minify files.
         /// </summary>
         public bool Minify { get; set; }
 

@@ -6,6 +6,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
     /// AutoPrefixer options
     /// </summary>
     public sealed class AutoPrefixerOptions {
+
         /// <summary>
         /// Constructs a instance of the CSS autoprefixing options
         /// </summary>

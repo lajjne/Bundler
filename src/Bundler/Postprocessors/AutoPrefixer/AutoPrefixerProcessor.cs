@@ -35,17 +35,17 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// <summary>
         /// The sync root for locking against.
         /// </summary>
-        private static readonly object SyncRoot = new object();
+        private static readonly object _syncRoot = new object();
 
         /// <summary>
         /// The javascript engine.
         /// </summary>
-        private IJsEngine javascriptEngine;
+        private IJsEngine _jsEngine;
 
         /// <summary>
         /// Whether the engine has been initialized.
         /// </summary>
-        private bool initialized;
+        private bool _initialized;
 
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
@@ -58,16 +58,14 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// method will not dispose again. This help not to prolong the entity's
         /// life in the Garbage Collector.
         /// </remarks>
-        private bool isDisposed;
+        private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoPrefixerProcessor"/> class.
         /// </summary>
-        /// <param name="javascriptEngineFactory">
-        /// The javascript engine factory.
-        /// </param>
-        public AutoPrefixerProcessor(Func<IJsEngine> javascriptEngineFactory) {
-            this.javascriptEngine = javascriptEngineFactory();
+        public AutoPrefixerProcessor() {
+            // TODO: maybe pass in engine name if default engine is not what we need
+            this._jsEngine = JsEngineSwitcher.Instance.CreateDefaultEngine();
         }
 
         /// <summary>
@@ -102,11 +100,11 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         public string Process(string input, AutoPrefixerOptions options) {
             string processedCode;
 
-            lock (SyncRoot) {
+            lock (_syncRoot) {
                 this.Initialize();
 
                 try {
-                    string result = this.javascriptEngine.Evaluate<string>(string.Format(CompilationFunctionCallTemplate, JsonConvert.SerializeObject(input), ConvertAutoPrefixerOptionsToJson(options)));
+                    string result = this._jsEngine.Evaluate<string>(string.Format(CompilationFunctionCallTemplate, JsonConvert.SerializeObject(input), ConvertAutoPrefixerOptionsToJson(options)));
 
                     JObject json = JObject.Parse(result);
                     JArray errors = json["errors"] as JArray;
@@ -187,38 +185,38 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// </summary>
         /// <param name="disposing">If true, the object gets disposed.</param>
         private void Dispose(bool disposing) {
-            if (this.isDisposed) {
+            if (this._disposed) {
                 return;
             }
 
             if (disposing) {
-                if (this.javascriptEngine != null) {
-                    this.javascriptEngine.RemoveVariable(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME);
-                    this.javascriptEngine.Dispose();
-                    this.javascriptEngine = null;
+                if (this._jsEngine != null) {
+                    this._jsEngine.RemoveVariable(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME);
+                    this._jsEngine.Dispose();
+                    this._jsEngine = null;
                 }
             }
 
             // Call the appropriate methods to clean up
             // unmanaged resources here.
             // Note disposing is done.
-            this.isDisposed = true;
+            this._disposed = true;
         }
 
         /// <summary>
         /// Initializes CSS autoprefixer
         /// </summary>
         private void Initialize() {
-            if (!this.initialized) {
+            if (!this._initialized) {
 
-                this.javascriptEngine.EmbedHostObject(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME, CountryStatisticsService.Instance);
+                this._jsEngine.EmbedHostObject(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME, CountryStatisticsService.Instance);
 
                 Type type = this.GetType();
 
-                this.javascriptEngine.ExecuteResource(AutoPrefixerLibraryResource, type);
-                this.javascriptEngine.ExecuteResource(AutoPrefixerHelperResource, type);
+                this._jsEngine.ExecuteResource(AutoPrefixerLibraryResource, type);
+                this._jsEngine.ExecuteResource(AutoPrefixerHelperResource, type);
 
-                this.initialized = true;
+                this._initialized = true;
             }
         }
     }

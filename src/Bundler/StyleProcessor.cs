@@ -78,7 +78,7 @@ namespace Bundler {
                         combinedCSS = stringBuilder.ToString();
 
                         // Apply autoprefixer
-                        combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerConfiguration.Instance.AutoPrefixerOptions);
+                        combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerConfig.Instance.AutoPrefixerOptions);
 
                         this.AddItemToCache(key, combinedCSS, bundler.FileMonitors);
                     }
