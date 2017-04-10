@@ -75,7 +75,7 @@
     <Compile Include="Helpers\AsyncDuplicateLock.cs" />
     <Compile Include="Helpers\AsyncHelper.cs" />
     <Compile Include="Helpers\ResourceHelper.cs" />
-    <Compile Include="JavaScriptLoadBehaviour.cs" />
+    <Compile Include="ScriptLoading.cs" />
     <Compile Include="Postprocessors\AutoPrefixer\AutoPrefixerOptions.cs" />
     <Compile Include="Postprocessors\AutoPrefixer\AutoPrefixerPostprocessor.cs" />
     <Compile Include="Postprocessors\AutoPrefixer\AutoPrefixerProcessingException.cs" />

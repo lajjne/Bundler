@@ -129,7 +129,7 @@ namespace Bundler {
         /// The <see cref="HtmlString"/> containing the script tag with the correct link.
         /// </returns>
         public static HtmlString Scripts(params string[] fileNames) {
-            return Scripts(GetDefaultBundleOptions(), JavaScriptLoadBehaviour.Inline, fileNames);
+            return Scripts(GetDefaultBundleOptions(), ScriptLoading.Inline, fileNames);
         }
 
         /// <summary>
@@ -141,25 +141,25 @@ namespace Bundler {
         /// The <see cref="HtmlString"/> containing the script tag with the correct link.
         /// </returns>
         public static HtmlString Scripts(BundleOutput options, params string[] fileNames) {
-            return Scripts(options, JavaScriptLoadBehaviour.Inline, fileNames);
+            return Scripts(options, ScriptLoading.Inline, fileNames);
         }
 
         /// <summary>
         /// Renders the correct html to create a script tag linking to the bundled JavaScript representing the given files.
         /// </summary>
         /// <param name="options">Bundle options deciding how to combine and/or minify the given files.</param>
-        /// <param name="behaviour">The <see cref="JavaScriptLoadBehaviour"/> describing the way the browser should load the JavaScript into the page.</param>
+        /// <param name="behaviour">The <see cref="ScriptLoading"/> describing the way the browser should load the JavaScript into the page.</param>
         /// <param name="fileNames">The .js files to link to.</param>
         /// <returns>
         /// The <see cref="HtmlString"/> containing the script tag with the correct link.
         /// </returns>
-        public static HtmlString Scripts(BundleOutput options, JavaScriptLoadBehaviour behaviour, params string[] fileNames) {
+        public static HtmlString Scripts(BundleOutput options, ScriptLoading behaviour, params string[] fileNames) {
             bool combined = options == BundleOutput.Combined || options == BundleOutput.MinifiedAndCombined;
             bool minified = options == BundleOutput.Minified || options == BundleOutput.MinifiedAndCombined;
             string ext = minified ? ".min.js" : ".js";
 
             HttpContext context = HttpContext.Current;
-            string behaviourParam = behaviour == JavaScriptLoadBehaviour.Inline ? string.Empty : " " + behaviour.ToString().ToLowerInvariant();
+            string behaviourParam = behaviour == ScriptLoading.Inline ? string.Empty : " " + behaviour.ToString().ToLowerInvariant();
             if (combined) {
                 // Combine files
                 string fileContent = AsyncHelper.RunSync(() => _scriptProcessor.ProcessJavascriptCrunchAsync(context, minified, fileNames));

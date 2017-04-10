@@ -3,7 +3,7 @@
     /// Describes the various loading behaviour available to the JavaScript script tag.
     /// <see href="http://www.growingwiththeweb.com/2014/02/async-vs-defer-attributes.html"/>
     /// </summary>
-    public enum JavaScriptLoadBehaviour {
+    public enum ScriptLoading {
         /// <summary>
         /// The default behaviour. Loads the script as soon as it is read within the page, blocking
         /// rendering until it is loaded. 
