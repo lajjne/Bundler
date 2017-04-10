@@ -23,7 +23,7 @@ namespace Bundler {
         /// <param name="context">
         /// The current context.
         /// </param>
-        public ScriptBundler(BundlerOptions options, HttpContext context)
+        public ScriptBundler(BundleOptions options, HttpContext context)
             : base(options, context) {
         }
 

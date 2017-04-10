@@ -38,12 +38,12 @@ namespace Bundler {
 
                     if (string.IsNullOrWhiteSpace(combinedJavaScript)) {
 
-                        BundlerOptions cruncherOptions = new BundlerOptions {
+                        BundleOptions options = new BundleOptions {
                             Minify = minify,
-                            CacheFiles = true
+                            WatchFiles = BundlerSettings.Current.WatchFiles
                         };
 
-                        ScriptBundler bundler = new ScriptBundler(cruncherOptions, context);
+                        ScriptBundler bundler = new ScriptBundler(options, context);
 
                         // Expand .bundle files
                         paths = ResourceHelper.ExpandBundles(context, true, null, paths);
@@ -61,7 +61,7 @@ namespace Bundler {
                             if (PreprocessorManager.Instance.AllowedExtensionsRegex.IsMatch(path)) {
                                 string filePath = ResourceHelper.GetFilePath(path, null, context);
                                 if (File.Exists(filePath)) {
-                                    cruncherOptions.RootFolder = Path.GetDirectoryName(filePath);
+                                    options.RootFolder = Path.GetDirectoryName(filePath);
                                     var result = await bundler.ProcessAsync(filePath);
 
                                     // Minify (unless already minified)

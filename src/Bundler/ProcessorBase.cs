@@ -1,10 +1,5 @@
 ﻿using Bundler.Caching;
-using Bundler.Configuration;
-using Bundler.Helpers;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
 

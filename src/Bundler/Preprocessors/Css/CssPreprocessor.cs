@@ -28,9 +28,9 @@ namespace Bundler.Preprocessors.Less {
         /// </summary>
         /// <param name="input">The input string to transform.</param>
         /// <param name="path">The path to the given input string to transform.</param>
-        /// <param name="cruncher">The cruncher that is running the transform.</param>
+        /// <param name="bundler">The cruncher that is running the transform.</param>
         /// <returns>The transformed string.</returns>
-        public string Transform(string input, string path, BundlerBase cruncher) {
+        public string Transform(string input, string path, BundlerBase bundler) {
             // Check for imports and parse if necessary.
             if (input.Contains("@import", StringComparison.OrdinalIgnoreCase)) {
 
@@ -54,26 +54,26 @@ namespace Bundler.Preprocessors.Less {
                         if (!fileName.Contains(Uri.SchemeDelimiter)) {
 
                             // Read the file.
-                            FileInfo fileInfo = new FileInfo(ResourceHelper.GetFilePath(fileName, cruncher.Options.RootFolder, cruncher.Context));
+                            FileInfo fileInfo = new FileInfo(ResourceHelper.GetFilePath(fileName, bundler.Options.RootFolder, bundler.Context));
                             if (fileInfo.Exists) {
                                 string file = fileInfo.FullName;
 
                                 using (StreamReader reader = new StreamReader(file)) {
                                     // Parse the children.
                                     if (mediaQuery != null) {
-                                        importedCss = string.Format(CultureInfo.InvariantCulture, "@media {0}{{{1}{2}{1}}}", mediaQuery, Environment.NewLine, Transform(reader.ReadToEnd(), file, cruncher));
+                                        importedCss = string.Format(CultureInfo.InvariantCulture, "@media {0}{{{1}{2}{1}}}", mediaQuery, Environment.NewLine, Transform(reader.ReadToEnd(), file, bundler));
                                     } else {
-                                        importedCss = Transform(reader.ReadToEnd(), file, cruncher);
+                                        importedCss = Transform(reader.ReadToEnd(), file, bundler);
                                     }
                                 }
 
                                 // Run the last filter. This should be the ResourcePreprocessor.
                                 importedCss = PreprocessorManager.Instance.PreProcessors
                                     .First(preprocessor => preprocessor.AllowedExtensions == null)
-                                    .Transform(importedCss, file, cruncher);
+                                    .Transform(importedCss, file, bundler);
 
                                 // Cache if applicable.
-                                cruncher.AddFileMonitor(file, importedCss);
+                                bundler.AddFileMonitor(file, importedCss);
                             }
 
                             // Replace the regex match with the full qualified css.

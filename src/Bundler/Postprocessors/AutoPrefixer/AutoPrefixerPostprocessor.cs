@@ -1,5 +1,4 @@
-﻿using Bundler.Configuration;
-using JavaScriptEngineSwitcher.Core;
+﻿using JavaScriptEngineSwitcher.Core;
 
 namespace Bundler.Postprocessors.AutoPrefixer {
 

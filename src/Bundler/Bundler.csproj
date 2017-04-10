@@ -61,15 +61,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bundle.cs" />
-    <Compile Include="BundleOptions.cs" />
+    <Compile Include="BundlerSettings.cs" />
+    <Compile Include="BundleOutput.cs" />
     <Compile Include="BundlerBase.cs" />
-    <Compile Include="BundlerOptions.cs" />
+    <Compile Include="BundleOptions.cs" />
     <Compile Include="Caching\CacheManager.cs" />
     <Compile Include="Compression\ColorNamesRange.cs" />
     <Compile Include="Compression\CssMinifier.cs" />
     <Compile Include="Compression\JavascriptMinifier.cs" />
     <Compile Include="Compression\VariableMinification.cs" />
-    <Compile Include="Configuration\BundlerConfig.cs" />
     <Compile Include="Extensions\AssemblyExtensions.cs" />
     <Compile Include="Extensions\DirectoryInfoExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

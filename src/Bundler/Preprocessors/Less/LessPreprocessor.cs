@@ -26,9 +26,9 @@ namespace Bundler.Preprocessors.Less {
         /// </summary>
         /// <param name="input">The input string to transform.</param>
         /// <param name="path">The path to the given input string to transform.</param>
-        /// <param name="cruncher">The cruncher that is running the transform.</param>
+        /// <param name="bundler">The bundler that is running the transform.</param>
         /// <returns>The transformed string.</returns>
-        public string Transform(string input, string path, BundlerBase cruncher) {
+        public string Transform(string input, string path, BundlerBase bundler) {
             // The standard engine returns a FileNotFoundExecption so I've rolled my own path resolver.
             Parser parser = new Parser();
             LessPathResolver dotLessPathResolver = new LessPathResolver(path);
@@ -39,15 +39,15 @@ namespace Bundler.Preprocessors.Less {
 
             try {
                 string result = lessEngine.TransformToCss(input, path);
-                if (cruncher.Options.CacheFiles) {
-                    // Add each import as a file dependency so that the cache will clean itself.
+                if (bundler.Options.WatchFiles) {
+                    // Add each import as a file dependency
                     IEnumerable<string> imports = lessEngine.GetImports();
                     IList<string> enumerable = imports as IList<string> ?? imports.ToList();
                     if (enumerable.Any()) {
                         foreach (string import in enumerable) {
                             if (!import.Contains(Uri.SchemeDelimiter)) {
                                 string filePath = HostingEnvironment.MapPath(VirtualPathUtility.Combine(dotLessPathResolver.CurrentFileDirectory, import));
-                                cruncher.AddFileMonitor(filePath, "not empty");
+                                bundler.AddFileMonitor(filePath, "not empty");
                             }
                         }
                     }

@@ -1,5 +1,4 @@
-﻿using Bundler.Configuration;
-using JavaScriptEngineSwitcher.Core;
+﻿using JavaScriptEngineSwitcher.Core;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -8,10 +7,7 @@ namespace Bundler.Web {
         protected void Application_Start() {
             AreaRegistration.RegisterAllAreas();
             JsEngineSwitcherConfig.Configure(JsEngineSwitcher.Instance);
-            BundlerConfig.Configure(new BundlerConfig() {
-                PhysicalFilesPath = "~/bundles",
-                PhysicalFilesDaysBeforeRemoveExpired = 5
-            });
+            BundlerConfig.Configure();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
         }
     }

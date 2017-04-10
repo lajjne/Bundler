@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Bundled</title>
-  @Bundle.Styles(BundleOptions.Minified, "/css/style.bundle")
-  @Bundle.Styles(BundleOptions.Combined, "/css/style.css", "/css/imports/style2.css", "/css/imports/style3.min.css")
+  @Bundle.Styles(BundleOutput.Minified, "/css/style.bundle")
+  @Bundle.Styles(BundleOutput.Combined, "/css/style.css", "/css/imports/style2.css", "/css/imports/style3.min.css")
 </head>
 <body>
   <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
@@ -42,6 +42,6 @@
       <div class="test-absolute-relative-path-image"></div>
     </main>
   </div>
-  @Bundle.Scripts(BundleOptions.MinifiedAndCombined, "/js/script.bundle")
+  @Bundle.Scripts(BundleOutput.MinifiedAndCombined, "/js/script.bundle")
 </body>
 </html>

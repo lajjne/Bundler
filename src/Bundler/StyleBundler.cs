@@ -32,7 +32,7 @@ namespace Bundler {
         /// <param name="context">
         /// The current context.
         /// </param>
-        public StyleBundler(BundlerOptions options, HttpContext context)
+        public StyleBundler(BundleOptions options, HttpContext context)
             : base(options, context) {
         }
 

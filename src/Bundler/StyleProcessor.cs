@@ -1,5 +1,4 @@
 ﻿using Bundler.Caching;
-using Bundler.Configuration;
 using Bundler.Extensions;
 using Bundler.Helpers;
 using Bundler.Preprocessors;
@@ -39,12 +38,13 @@ namespace Bundler {
                     combinedCSS = (string)CacheManager.GetItem(key);
 
                     if (string.IsNullOrWhiteSpace(combinedCSS)) {
-                        BundlerOptions cruncherOptions = new BundlerOptions {
+
+                        BundleOptions options = new BundleOptions {
                             Minify = minify,
-                            CacheFiles = true
+                            WatchFiles = BundlerSettings.Current.WatchFiles
                         };
 
-                        StyleBundler bundler = new StyleBundler(cruncherOptions, context);
+                        StyleBundler bundler = new StyleBundler(options, context);
 
                         // Expand .bundle files
                         paths = ResourceHelper.ExpandBundles(context, true, null, paths);
@@ -60,9 +60,9 @@ namespace Bundler {
                             }
 
                             if (PreprocessorManager.Instance.AllowedExtensionsRegex.IsMatch(path)) {
-                                string filePath = ResourceHelper.GetFilePath(path, cruncherOptions.RootFolder, context);
+                                string filePath = ResourceHelper.GetFilePath(path, options.RootFolder, context);
                                 if (File.Exists(filePath)) {
-                                    cruncherOptions.RootFolder = Path.GetDirectoryName(filePath);
+                                    options.RootFolder = Path.GetDirectoryName(filePath);
                                     var result = await bundler.ProcessAsync(filePath);
 
                                     // Minify (unless already minified)
@@ -78,7 +78,7 @@ namespace Bundler {
                         combinedCSS = stringBuilder.ToString();
 
                         // Apply autoprefixer
-                        combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerConfig.Instance.AutoPrefixerOptions);
+                        combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerSettings.Current.AutoPrefixerOptions);
 
                         this.AddItemToCache(key, combinedCSS, bundler.FileMonitors);
                     }

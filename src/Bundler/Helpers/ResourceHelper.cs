@@ -1,5 +1,4 @@
 ﻿using Bundler.Caching;
-using Bundler.Configuration;
 using Bundler.Extensions;
 using System;
 using System.Collections.Generic;
@@ -170,12 +169,12 @@ namespace Bundler.Helpers {
             // Cache item to ensure that checking whether the file exists is performed only every xx hours
             string cacheIdCheckFileExists = $"_CruncherCheckFileExists_{fileName}";
 
-            string fileVirtualPath = VirtualPathUtility.AppendTrailingSlash(BundlerConfig.Instance.PhysicalFilesPath) + fileName;
+            string fileVirtualPath = VirtualPathUtility.AppendTrailingSlash(BundlerSettings.Current.OutputPath) + fileName;
             string filePath = HostingEnvironment.MapPath(fileVirtualPath);
 
             // Trims the physical files folder ensuring that it does not contains files older than xx days 
             // This is performed before creating the physical resource file
-            await TrimPhysicalFilesFolderAsync(HostingEnvironment.MapPath(BundlerConfig.Instance.PhysicalFilesPath));
+            await TrimPhysicalFilesFolderAsync(HostingEnvironment.MapPath(BundlerSettings.Current.OutputPath));
 
             // Check whether the resource file already exists
             if (filePath != null) {
@@ -208,7 +207,7 @@ namespace Bundler.Helpers {
                     } else {
                         // The resource file doesn't exist 
                         // Make sure that the directory exists
-                        string directoryPath = HostingEnvironment.MapPath(BundlerConfig.Instance.PhysicalFilesPath);
+                        string directoryPath = HostingEnvironment.MapPath(BundlerSettings.Current.OutputPath);
                         if (directoryPath != null) {
                             DirectoryInfo directoryInfo = new DirectoryInfo(directoryPath);
                             if (!directoryInfo.Exists) {
@@ -249,7 +248,7 @@ namespace Bundler.Helpers {
         /// </returns>
         public static async Task TrimPhysicalFilesFolderAsync(string path) {
             // If PhysicalFilesDaysBeforeRemoveExpired is 0 or negative then the trim process is not performed
-            if (BundlerConfig.Instance.PhysicalFilesDaysBeforeRemoveExpired < 1) {
+            if (BundlerSettings.Current.DaysToKeepFiles < 1) {
                 return;
             }
 
@@ -293,7 +292,7 @@ namespace Bundler.Helpers {
                 IEnumerable<FileInfo> files = await directoryInfo.EnumerateFilesAsync();
                 files = files.Where(f => PhysicalFileRegex.IsMatch(Path.GetFileName(f.Name)))
                              .OrderBy(f => f.CreationTimeUtc);
-                int maxDays = BundlerConfig.Instance.PhysicalFilesDaysBeforeRemoveExpired;
+                int maxDays = BundlerSettings.Current.DaysToKeepFiles;
 
                 foreach (FileInfo fileInfo in files) {
                     try {

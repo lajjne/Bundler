@@ -24,7 +24,7 @@ namespace Bundler {
         /// Initializes a new instance of the <see cref="BundlerBase"/> class.
         /// </summary>
         /// <param name="options">The options containing instructions for the bundler.</param>
-        protected BundlerBase(BundlerOptions options, HttpContext context) {
+        protected BundlerBase(BundleOptions options, HttpContext context) {
             this.context = context;
             this.Options = options;
             this.FileMonitors = new ConcurrentBag<string>();
@@ -42,7 +42,7 @@ namespace Bundler {
         /// <summary>
         /// Gets or sets the options containing instructions for the bundler.
         /// </summary>
-        public BundlerOptions Options { get; set; }
+        public BundleOptions Options { get; set; }
 
         /// <summary>
         /// Gets or sets the file monitors.
@@ -59,17 +59,13 @@ namespace Bundler {
         }
 
         /// <summary>
-        /// Adds a cached file monitor to the list.
+        /// Adds a file monitor to the list.
         /// </summary>
-        /// <param name="file">
-        /// The file to add to the monitors list.
-        /// </param>
-        /// <param name="contents">
-        /// The contents of the file.
-        /// </param>
+        /// <param name="file">The file to add to the monitors list.</param>
+        /// <param name="contents">The contents of the file.</param>
         public void AddFileMonitor(string file, string contents) {
             // Cache if applicable.
-            if (this.Options.CacheFiles && !string.IsNullOrWhiteSpace(contents)) {
+            if (this.Options.WatchFiles && !string.IsNullOrWhiteSpace(contents)) {
                 this.FileMonitors.Add(file);
             }
         }

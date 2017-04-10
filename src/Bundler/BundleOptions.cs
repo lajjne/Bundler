@@ -1,23 +1,22 @@
 ﻿namespace Bundler {
+
     /// <summary>
-    /// 
+    /// Options used when bundling files in a bundle.
     /// </summary>
-    public enum BundleOptions {
+    public class BundleOptions {
         /// <summary>
-        /// Left as individual unminified files.
+        /// Gets or sets a value indicating whether to minify the files in the bundle.
         /// </summary>
-        Normal,
+        public bool Minify { get; set; }
+
         /// <summary>
-        /// Left as individual minified files.
+        /// Gets or sets the root folder for the bundle and/or current file being processed.
         /// </summary>
-        Minified,
+        public string RootFolder { get; set; }
+
         /// <summary>
-        /// Combined into single unminified file.
+        /// Gets or sets a value indicating whether to watch files included in the bundle for changes.
         /// </summary>
-        Combined,
-        /// <summary>
-        /// Combined and Minified into a single file.
-        /// </summary>
-        MinifiedAndCombined
+        public bool WatchFiles { get; set; }
     }
 }
