@@ -52,9 +52,9 @@ namespace Bundler {
                         StringBuilder stringBuilder = new StringBuilder();
                         foreach (string path in paths) {
 
-                            // Monitor .bundle file
+                            // Watch .bundle file
                             if (Path.GetExtension(path) == ".bundle") {
-                                bundler.AddFileMonitor(path, "not empty");
+                                bundler.AddFileMonitor(path);
                                 continue;
                             }
 

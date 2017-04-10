@@ -64,8 +64,8 @@ namespace Bundler {
 
             contents = this.PreProcessInput(contents, file);
 
-            // Cache if applicable.
-            this.AddFileMonitor(file, contents);
+            // Watch file if applicable.
+            this.AddFileMonitor(file);
 
             return contents;
         }

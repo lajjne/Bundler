@@ -30,7 +30,7 @@ namespace Bundler.Preprocessors.Sass {
                 var compiler = new LibSass.Compiler.SassCompiler(options);
                 var result = compiler.Compile();
                 foreach (var file in result.IncludedFiles) {
-                    cruncher.AddFileMonitor(file, "not empty");
+                    cruncher.AddFileMonitor(file);
                 }
                 return result.Output;
             } catch (Exception ex) {

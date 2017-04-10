@@ -47,7 +47,7 @@ namespace Bundler.Preprocessors.Less {
                         foreach (string import in enumerable) {
                             if (!import.Contains(Uri.SchemeDelimiter)) {
                                 string filePath = HostingEnvironment.MapPath(VirtualPathUtility.Combine(dotLessPathResolver.CurrentFileDirectory, import));
-                                bundler.AddFileMonitor(filePath, "not empty");
+                                bundler.AddFileMonitor(filePath);
                             }
                         }
                     }

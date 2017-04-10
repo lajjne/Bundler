@@ -62,10 +62,9 @@ namespace Bundler {
         /// Adds a file monitor to the list.
         /// </summary>
         /// <param name="file">The file to add to the monitors list.</param>
-        /// <param name="contents">The contents of the file.</param>
-        public void AddFileMonitor(string file, string contents) {
+        public void AddFileMonitor(string file) {
             // Cache if applicable.
-            if (this.Options.WatchFiles && !string.IsNullOrWhiteSpace(contents)) {
+            if (this.Options.WatchFiles) {
                 this.FileMonitors.Add(file);
             }
         }
@@ -103,7 +102,7 @@ namespace Bundler {
         protected virtual string PreProcessInput(string input, string path) {
             string extension = path.Substring(path.LastIndexOf('.')).ToUpperInvariant();
 
-            input = PreprocessorManager.Instance.PreProcessors
+            input = PreprocessorManager.Instance.Preprocessors
                 .Where(p => p.AllowedExtensions != null && p.AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
                 .Aggregate(input, (current, p) => p.Transform(current, path, this));
 

@@ -82,8 +82,8 @@ namespace Bundler {
             // Preprocess
             contents = this.PreProcessInput(contents, file);
 
-            // Cache if applicable.
-            this.AddFileMonitor(file, contents);
+            // Watch file if applicable.
+            this.AddFileMonitor(file);
 
             return contents;
         }
@@ -99,7 +99,7 @@ namespace Bundler {
             input = base.PreProcessInput(input, path);
 
             // Run the last filter. This should be the ResourcePreprocessor.
-            input = PreprocessorManager.Instance.PreProcessors
+            input = PreprocessorManager.Instance.Preprocessors
                 .First(preprocessor => preprocessor.AllowedExtensions == null)
                 .Transform(input, path, this);
 

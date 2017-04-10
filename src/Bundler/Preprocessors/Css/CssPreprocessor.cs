@@ -6,7 +6,7 @@ using Bundler.Helpers;
 using System.IO;
 using System.Globalization;
 
-namespace Bundler.Preprocessors.Less {
+namespace Bundler.Preprocessors.Css {
 
     /// <summary>
     /// Provides methods to preprocess CSS.
@@ -68,12 +68,12 @@ namespace Bundler.Preprocessors.Less {
                                 }
 
                                 // Run the last filter. This should be the ResourcePreprocessor.
-                                importedCss = PreprocessorManager.Instance.PreProcessors
+                                importedCss = PreprocessorManager.Instance.Preprocessors
                                     .First(preprocessor => preprocessor.AllowedExtensions == null)
                                     .Transform(importedCss, file, bundler);
 
-                                // Cache if applicable.
-                                bundler.AddFileMonitor(file, importedCss);
+                                // Watch file
+                                bundler.AddFileMonitor(file);
                             }
 
                             // Replace the regex match with the full qualified css.

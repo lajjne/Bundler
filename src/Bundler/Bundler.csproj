@@ -70,7 +70,6 @@
     <Compile Include="Compression\CssMinifier.cs" />
     <Compile Include="Compression\JavascriptMinifier.cs" />
     <Compile Include="Compression\VariableMinification.cs" />
-    <Compile Include="Extensions\AssemblyExtensions.cs" />
     <Compile Include="Extensions\DirectoryInfoExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\AsyncDuplicateLock.cs" />

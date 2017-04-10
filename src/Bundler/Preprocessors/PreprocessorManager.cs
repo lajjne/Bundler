@@ -1,4 +1,7 @@
 ﻿using Bundler.Extensions;
+using Bundler.Preprocessors.Css;
+using Bundler.Preprocessors.Less;
+using Bundler.Preprocessors.Sass;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,15 +15,14 @@ using System.Text.RegularExpressions;
 namespace Bundler.Preprocessors {
 
     /// <summary>
-    /// The cruncher configuration.
+    /// 
     /// </summary>
     public class PreprocessorManager {
         /// <summary>
         /// A new instance Initializes a new instance of the <see cref="T:Bundler.Preprocessors.PreprocessorManager"/> class.
         /// initialized lazily.
         /// </summary>
-        private static readonly Lazy<PreprocessorManager> Lazy =
-                        new Lazy<PreprocessorManager>(() => new PreprocessorManager());
+        private static readonly Lazy<PreprocessorManager> Lazy = new Lazy<PreprocessorManager>(() => new PreprocessorManager());
 
         /// <summary>
         /// Prevents a default instance of the <see cref="T:Bundler.Preprocessors.PreprocessorManager"/> class from being created.
@@ -38,7 +40,7 @@ namespace Bundler.Preprocessors {
         /// <summary>
         /// Gets the list of available Preprocessors.
         /// </summary>
-        public IList<IPreprocessor> PreProcessors { get; private set; }
+        public IList<IPreprocessor> Preprocessors { get; private set; }
 
         /// <summary>
         /// Gets the regular expression for matching allowed file type.
@@ -46,87 +48,14 @@ namespace Bundler.Preprocessors {
         public Regex AllowedExtensionsRegex { get; private set; }
 
         /// <summary>
-        /// Creates a list, using reflection, of supported preprocessors that Bundler can run.
+        /// Load the preprocessors that Bundler can run. We should probably use a DI container for this instead of hardcoding, but this works for now-
         /// </summary>
         private void LoadPreprocessors() {
-            if (this.PreProcessors == null) {
-                Type type = typeof(IPreprocessor);
-
-                // Get any referenced but not used assemblies.
-                Assembly executingAssembly = Assembly.GetExecutingAssembly();
-                string targetBasePath = Path.GetDirectoryName(new Uri(executingAssembly.Location).LocalPath);
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                FileInfo[] files = new DirectoryInfo(targetBasePath).GetFiles("*.dll", SearchOption.AllDirectories);
-
-                HashSet<string> found = new HashSet<string>();
-                foreach (FileInfo fileInfo in files) {
-                    try {
-                        AssemblyName assemblyName = AssemblyName.GetAssemblyName(fileInfo.FullName);
-
-                        if (!AppDomain.CurrentDomain.GetAssemblies()
-                            .Any(a => AssemblyName.ReferenceMatchesDefinition(assemblyName, a.GetName()))) {
-                            // In a web app, this assembly will automatically be bound from the 
-                            // Asp.Net Temporary folder from where the site actually runs.
-                            Assembly.Load(assemblyName);
-                            this.LoadReferencedAssemblies(found, Assembly.Load(assemblyName));
-                        }
-                    } catch (Exception ex) {
-                        // Log the exception for debugging only. There could be any old junk 
-                        // thrown in to the bin folder by someone else.
-                        Debug.WriteLine(ex.Message);
-                    }
-                }
-
-                List<Type> availableTypes = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .SelectMany(a => a.GetLoadableTypes())
-                .Where(t => type.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                .ToList();
-
-                this.PreProcessors = availableTypes
-                    .Select(f => (Activator.CreateInstance(f) as IPreprocessor)).ToList();
-            }
-        }
-
-        /// <summary>
-        /// Loads any referenced assemblies into the current application domain.
-        /// </summary>
-        /// <param name="found">
-        /// The collection containing the name of already found assemblies.
-        /// </param>
-        /// <param name="assembly">
-        /// The assembly to load from.
-        /// </param>
-        private void LoadReferencedAssemblies(HashSet<string> found, Assembly assembly) {
-            // Used to avoid duplicates 
-            ArrayList results = new ArrayList();
-
-            // Resulting info 
-            Stack stack = new Stack();
-
-            // Stack of names
-            // Store root assembly (level 0) directly into results list 
-            stack.Push(assembly.ToString());
-
-            // Do a pre-order, non-recursive traversal 
-            while (stack.Count > 0) {
-                string info = (string)stack.Pop();
-
-                // Get next assembly 
-                if (!found.Contains(info)) {
-                    found.Add(info);
-                    results.Add(info);
-
-                    // Store it to results ArrayList
-                    Assembly child = Assembly.Load(info);
-                    AssemblyName[] subchild = child.GetReferencedAssemblies();
-
-                    for (int i = subchild.Length - 1; i >= 0; --i) {
-                        stack.Push(subchild[i].ToString());
-                    }
-                }
-            }
+            Preprocessors = new List<IPreprocessor>();
+            Preprocessors.Add(new CssPreprocessor());
+            Preprocessors.Add(new LessPreprocessor());
+            Preprocessors.Add(new SassPreprocessor());
+            Preprocessors.Add(new ResourcePreprocessor());
         }
 
         /// <summary>
@@ -135,7 +64,7 @@ namespace Bundler.Preprocessors {
         private void CreateAllowedExtensionRegex() {
             StringBuilder stringBuilder = new StringBuilder(@"\.js|");
 
-            foreach (IPreprocessor preprocessor in this.PreProcessors) {
+            foreach (IPreprocessor preprocessor in this.Preprocessors) {
                 string[] extensions = preprocessor.AllowedExtensions;
 
                 if (extensions != null) {
