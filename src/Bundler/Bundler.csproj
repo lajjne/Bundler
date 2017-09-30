@@ -32,26 +32,47 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AjaxMin, Version=5.14.5506.26196, Culture=neutral, PublicKeyToken=21ef50ce11b5d80f, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\AjaxMin.5.14.5506.26202\lib\net40\AjaxMin.dll</HintPath>
-    </Reference>
     <Reference Include="dotless.Core, Version=1.5.2.0, Culture=neutral, PublicKeyToken=96b446c9e63eae34, processorArchitecture=MSIL">
       <HintPath>..\..\packages\dotless.1.5.2\lib\dotless.Core.dll</HintPath>
     </Reference>
-    <Reference Include="JavaScriptEngineSwitcher.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\JavaScriptEngineSwitcher.Core.2.2.0\lib\net45\JavaScriptEngineSwitcher.Core.dll</HintPath>
+    <Reference Include="JavaScriptEngineSwitcher.Core, Version=2.4.10.0, Culture=neutral, PublicKeyToken=c608b2a8cc9e4472, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\JavaScriptEngineSwitcher.Core.2.4.10\lib\net45\JavaScriptEngineSwitcher.Core.dll</HintPath>
     </Reference>
     <Reference Include="LibSass.NET, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\libsassnet.3.3.7\lib\net40\LibSass.NET.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NUglify, Version=1.5.8.0, Culture=neutral, PublicKeyToken=15bc7810aec21b5e, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NUglify.1.5.8\lib\net40\NUglify.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,22 +81,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bundle.cs" />
-    <Compile Include="BundlerSettings.cs" />
-    <Compile Include="BundleOutput.cs" />
-    <Compile Include="BundlerBase.cs" />
     <Compile Include="BundleOptions.cs" />
+    <Compile Include="BundleOutput.cs" />
+    <Compile Include="Bundler.cs" />
+    <Compile Include="BundlerBase.cs" />
+    <Compile Include="BundlerSettings.cs" />
     <Compile Include="Caching\CacheManager.cs" />
-    <Compile Include="Compression\ColorNamesRange.cs" />
     <Compile Include="Compression\CssMinifier.cs" />
     <Compile Include="Compression\JavascriptMinifier.cs" />
-    <Compile Include="Compression\VariableMinification.cs" />
-    <Compile Include="Extensions\DirectoryInfoExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Helpers\AsyncDuplicateLock.cs" />
     <Compile Include="Helpers\AsyncHelper.cs" />
     <Compile Include="Helpers\ResourceHelper.cs" />
-    <Compile Include="ScriptLoading.cs" />
     <Compile Include="Postprocessors\AutoPrefixer\AutoPrefixerOptions.cs" />
     <Compile Include="Postprocessors\AutoPrefixer\AutoPrefixerPostprocessor.cs" />
     <Compile Include="Postprocessors\AutoPrefixer\AutoPrefixerProcessingException.cs" />
@@ -83,33 +100,32 @@
     <Compile Include="Postprocessors\AutoPrefixer\CountryStatisticsService.cs" />
     <Compile Include="Preprocessors\Css\CssPreprocessor.cs" />
     <Compile Include="Preprocessors\IPreprocessor.cs" />
-    <Compile Include="Preprocessors\Less\LessCompilingException.cs" />
     <Compile Include="Preprocessors\Less\LessPathResolver.cs" />
     <Compile Include="Preprocessors\Less\LessPreprocessor.cs" />
     <Compile Include="Preprocessors\PreprocessorManager.cs" />
     <Compile Include="Preprocessors\ResourcePreprocessor.cs" />
-    <Compile Include="Preprocessors\Sass\SassCompilingException.cs" />
     <Compile Include="Preprocessors\Sass\SassPreprocessor.cs" />
     <Compile Include="ProcessorBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptBundler.cs" />
+    <Compile Include="ScriptLoading.cs" />
     <Compile Include="ScriptProcessor.cs" />
     <Compile Include="StyleBundler.cs" />
     <Compile Include="StyleProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Postprocessors\AutoPrefixer\Resources\CountryStatistics\*.json" />
-    <None Include="Postprocessors\AutoPrefixer\Resources\autoprefixer-combined.js" />
     <EmbeddedResource Include="Postprocessors\AutoPrefixer\Resources\autoprefixer-combined.min.js">
       <DependentUpon>autoprefixer-combined.js</DependentUpon>
     </EmbeddedResource>
-    <None Include="Postprocessors\AutoPrefixer\Resources\autoprefixerHelper.js" />
     <EmbeddedResource Include="Postprocessors\AutoPrefixer\Resources\autoprefixerHelper.min.js">
       <DependentUpon>autoprefixerHelper.js</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Postprocessors\AutoPrefixer\Resources\CountryStatistics\*.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Postprocessors\AutoPrefixer\Resources\autoprefixer-combined.js" />
+    <None Include="Postprocessors\AutoPrefixer\Resources\autoprefixerHelper.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\packages\libsassnet.3.3.7\build\libsassnet.targets" Condition="Exists('..\..\packages\libsassnet.3.3.7\build\libsassnet.targets')" />

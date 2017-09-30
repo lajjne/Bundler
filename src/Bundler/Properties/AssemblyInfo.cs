@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Bundler")]
 [assembly: AssemblyDescription("A CSS, Less, Sass and JavaScript bundler for ASP.NET")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Incentive, Inc.")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bundler")]
 [assembly: AssemblyCopyright("Copyright © 2017")]
 [assembly: AssemblyTrademark("")]

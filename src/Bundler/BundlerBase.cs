@@ -4,8 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -15,6 +13,7 @@ namespace Bundler {
     /// Bundler base class. Inherit from this to implement your own bundler. 
     /// </summary>
     public abstract class BundlerBase {
+
         /// <summary>
         /// The current context.
         /// </summary>
@@ -24,6 +23,7 @@ namespace Bundler {
         /// Initializes a new instance of the <see cref="BundlerBase"/> class.
         /// </summary>
         /// <param name="options">The options containing instructions for the bundler.</param>
+        /// <param name="context"></param>
         protected BundlerBase(BundleOptions options, HttpContext context) {
             this.context = context;
             this.Options = options;

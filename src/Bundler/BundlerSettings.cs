@@ -16,14 +16,10 @@ namespace Bundler {
                 Browsers = new string[] { "last 2 versions" }
             };
             DaysToKeepFiles = 7;
-            OutputPath = "~/bundles";
+            ScriptOutputPath = "~/js";
+            StyleOutputPath = "~/css";
             WatchFiles = true;
         }
-
-        /// <summary>
-        /// Gets ot sets the currently configured settings.
-        /// </summary>
-        public static BundlerSettings Current { get; internal set; } = new BundlerSettings();
 
         /// <summary>
         /// Gets or sets the auto prefixer options used when bundling styles.
@@ -31,17 +27,27 @@ namespace Bundler {
         public AutoPrefixerOptions AutoPrefixerOptions { get; set; }
 
         /// <summary>
-        /// Gets or sets the number of days to keep the files in the <see cref="OutputPath"/> before they are cleaned up.
+        /// Gets ot sets the currently configured settings.
+        /// </summary>
+        public static BundlerSettings Current { get; internal set; } = new BundlerSettings();
+
+        /// <summary>
+        /// Gets or sets the number of days to keep output files before they are cleaned up.
         /// </summary>
         public int DaysToKeepFiles { get; set; }
 
         /// <summary>
-        /// Gets or sets the directory path where to write bundle files, e.g. ~/bundles.
+        /// Gets or sets the directory path where to write bundled script files, e.g. ~/js.
         /// </summary>
-        public string OutputPath { get; set; }
+        public string ScriptOutputPath { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to watch files inucluded in a bundle for changes.
+        /// Gets or sets the directory path where to write bundled stylesheets, e.g. ~/css.
+        /// </summary>
+        public string StyleOutputPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to watch files included in a bundle for changes.
         /// </summary>
         public bool WatchFiles { get; set; }
     }

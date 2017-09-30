@@ -12,28 +12,34 @@ namespace Bundler.Preprocessors.Less {
         /// <summary>
         /// The current file directory.
         /// </summary>
-        private string currentFileDirectory;
+        private string _currentFileDirectory;
 
         /// <summary>
         /// The current file path.
         /// </summary>
-        private string currentFilePath;
+        private string _currentFilePath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LessPathResolver"/> class.
         /// </summary>
-        /// <param name="currentFilePath">
-        /// The current file path.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if currentFilePath is null.
-        /// </exception>
+        /// <param name="currentFilePath">The current file path.</param>
+        /// <exception cref="ArgumentNullException">Thrown if currentFilePath is null.</exception>
         public LessPathResolver(string currentFilePath) {
             if (string.IsNullOrWhiteSpace(currentFilePath)) {
                 throw new ArgumentNullException(nameof(currentFilePath));
             }
 
-            this.CurrentFilePath = currentFilePath;
+            CurrentFilePath = currentFilePath;
+        }
+
+
+        /// <summary>
+        /// Gets the current file directory.
+        /// </summary>
+        public string CurrentFileDirectory {
+            get {
+                return _currentFileDirectory;
+            }
         }
 
         /// <summary>
@@ -41,7 +47,7 @@ namespace Bundler.Preprocessors.Less {
         /// </summary>
         public string CurrentFilePath {
             get {
-                return this.currentFilePath;
+                return _currentFilePath;
             }
 
             set {
@@ -60,32 +66,24 @@ namespace Bundler.Preprocessors.Less {
 
                 value = VirtualPathUtility.Combine(virtualRoot, value);
 
-                this.currentFilePath = value;
-                this.currentFileDirectory = VirtualPathUtility.GetDirectory(value);
+                _currentFilePath = value;
+                _currentFileDirectory = VirtualPathUtility.GetDirectory(value);
             }
         }
-
+        
         /// <summary>
-        /// Gets the current file directory.
-        /// </summary>
-        public string CurrentFileDirectory => this.currentFileDirectory;
-
-        /// <summary>
-        /// Returns the full path for the specified file <param name="path"/>.
+        /// Returns the full path for the specified file path />.
         /// </summary>
         /// <param name="path">The imported file path.</param>
-        /// <returns>
-        /// The <see cref="string"/> containing the imported file path.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown if path is null.
-        /// </exception>
+        /// <returns>The <see cref="string"/> containing the imported file path.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if path is null.</exception>
         public string GetFullPath(string path) {
             if (string.IsNullOrWhiteSpace(path)) {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return HostingEnvironment.MapPath(VirtualPathUtility.Combine(this.currentFileDirectory, path));
+            return HostingEnvironment.MapPath(VirtualPathUtility.Combine(_currentFileDirectory, path));
         }
     }
 }
+

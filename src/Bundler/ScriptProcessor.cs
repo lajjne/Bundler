@@ -31,7 +31,7 @@ namespace Bundler {
             string combinedJavaScript = string.Empty;
 
             if (paths != null) {
-                string key = string.Join(string.Empty, paths).ToMd5Fingerprint();
+                string key = string.Concat(paths).ToMd5Fingerprint() + (minify ? Bundler.DOT_MIN : "");
 
                 using (await Locker.LockAsync(key)) {
                     combinedJavaScript = (string)CacheManager.GetItem(key);
@@ -53,7 +53,7 @@ namespace Bundler {
                         foreach (string path in paths) {
 
                             // Watch .bundle file
-                            if (Path.GetExtension(path) == ".bundle") {
+                            if (Path.GetExtension(path).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
                                 bundler.AddFileMonitor(path);
                                 continue;
                             }
@@ -65,17 +65,16 @@ namespace Bundler {
                                     var result = await bundler.ProcessAsync(filePath);
 
                                     // Minify (unless already minified)
-                                    if (minify && !filePath.Contains(".min", StringComparison.OrdinalIgnoreCase)) {
+                                    if (minify && !filePath.Contains(Bundler.DOT_MIN, StringComparison.OrdinalIgnoreCase)) {
                                         result = bundler.Minify(result);
                                     }
 
-                                    // NOTE: always add semi-colon to avoid problem when combining scripts 
-                                    result = result.TrimEnd();
-                                    if (!result.EndsWith(";")) {
-                                        result += ";";
-                                    }
-
                                     stringBuilder.Append(result);
+
+                                    if (!result.TrimEnd().EndsWith(";")) {
+                                        // add semi-colon and new line to avoid problem when combining scripts 
+                                        stringBuilder.AppendLine(";");
+                                    }
 
                                 }
                             }
@@ -83,7 +82,7 @@ namespace Bundler {
 
                         combinedJavaScript = stringBuilder.ToString();
 
-                        this.AddItemToCache(key, combinedJavaScript, bundler.FileMonitors);
+                        AddItemToCache(key, combinedJavaScript, bundler.FileMonitors);
                     }
                 }
             }

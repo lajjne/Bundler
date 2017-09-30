@@ -1,16 +1,11 @@
-﻿using Bundler.Compression;
-using Bundler.Extensions;
-using Bundler.Helpers;
-using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Web;
+using Bundler.Compression;
 
 namespace Bundler {
 
     /// <summary>
-    /// The JavaScript cruncher.
+    /// The JavaScript bundler.
     /// </summary>
     public class ScriptBundler : BundlerBase {
 
@@ -18,7 +13,7 @@ namespace Bundler {
         /// Initializes a new instance of the <see cref="ScriptBundler"/> class.
         /// </summary>
         /// <param name="options">
-        /// The options containing instructions for the cruncher.
+        /// The options containing instructions for the bundler.
         /// </param>
         /// <param name="context">
         /// The current context.
@@ -35,19 +30,11 @@ namespace Bundler {
         /// The minified resource.
         /// </returns>
         public override string Minify(string script) {
-            JavaScriptMinifier minifier;
-
-            if (this.Options.Minify) {
-                minifier = new JavaScriptMinifier {
-                    VariableMinification = VariableMinification.LocalVariablesAndFunctionArguments
-                };
-            } else {
-                minifier = new JavaScriptMinifier {
-                    VariableMinification = VariableMinification.None,
-                    PreserveFunctionNames = true,
-                    RemoveWhiteSpace = false
-                };
-            }
+            var minifier = new JavaScriptMinifier {
+                LocalRenaming = Options.Minify ? NUglify.JavaScript.LocalRenaming.CrunchAll : NUglify.JavaScript.LocalRenaming.KeepAll,
+                PreserveFunctionNames = !Options.Minify,
+                RemoveWhiteSpace = Options.Minify
+            };
 
             return minifier.Minify(script);
         }

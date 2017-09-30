@@ -3,9 +3,8 @@
 namespace Bundler.Postprocessors.AutoPrefixer {
 
     /// <summary>
-    /// The auto prefixer postprocessor.
-    /// by using Andrey Sitnik's Autoprefixer
-    /// <see href="https://bundletransformer.codeplex.com"/>
+    /// The auto prefixer postprocessor. 
+    /// <see href="https://github.com/Taritsyn/BundleTransformer/tree/master/src/BundleTransformer.Autoprefixer"/>
     /// </summary>
     public class AutoPrefixerPostprocessor {
         /// <summary>

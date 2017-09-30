@@ -21,14 +21,14 @@ namespace Bundler.Preprocessors.Css {
         /// <summary>
         /// Gets the extension that this filter processes.
         /// </summary>
-        public string[] AllowedExtensions => new[] { ".css" };
+        public string[] AllowedExtensions => new[] { Bundler.DOT_CSS };
 
         /// <summary>
         /// Parses the string for CSS imports and replaces them with the referenced CSS. Also minifies the CSS if needed.
         /// </summary>
         /// <param name="input">The input string to transform.</param>
         /// <param name="path">The path to the given input string to transform.</param>
-        /// <param name="bundler">The cruncher that is running the transform.</param>
+        /// <param name="bundler">The bundler that is running the transform.</param>
         /// <returns>The transformed string.</returns>
         public string Transform(string input, string path, BundlerBase bundler) {
             // Check for imports and parse if necessary.

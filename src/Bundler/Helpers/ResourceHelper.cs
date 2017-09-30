@@ -18,31 +18,33 @@ namespace Bundler.Helpers {
     /// Provides a series of helper methods for dealing with resources.
     /// </summary>
     public class ResourceHelper {
-        /// <summary>
-        /// The physical file regex.
-        /// </summary>
-        private static readonly Regex PhysicalFileRegex = new Regex(@"\.(css|js)$", RegexOptions.IgnoreCase);
+
+        private const int CheckCreationDateFrequencyHours = 6;
+        private const string CacheIdTrimPhysicalFilesFolder = "_BundlerTrimPhysicalFilesFolder";
+        private const string CacheIdTrimPhysicalFilesFolderAppPoolRecycled = "_BundlerTrimPhysicalFilesFolderAppPoolRecycled";
+        private const int TrimPhysicalFilesFolderDelayedExecutionMin = 5;
+        private const int TrimPhysicalFilesFolderFrequencyHours = 7;
 
         /// <summary>
         /// Expand .bundle files
         /// </summary>
-        /// <param name="bundler"></param>
+        /// <param name="context"></param>
         /// <param name="keepBundle"></param>
         /// <param name="rootPath"></param>
         /// <param name="fileNames"></param>
         /// <returns></returns>
         public static string[] ExpandBundles(HttpContext context, bool keepBundle, string rootPath, params string[] fileNames) {
-            if (fileNames.Any(x => Path.GetExtension(x) == ".bundle")) {
+            if (fileNames.Any(x => Path.GetExtension(x).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase))) {
                 List<string> paths = new List<string>();
                 foreach (var fileName in fileNames) {
-                    if (Path.GetExtension(fileName) == ".bundle") {
+                    if (Path.GetExtension(fileName).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
                         string bundleFile = null;
                         if (keepBundle) {
                             bundleFile = ResourceHelper.GetFilePath(fileName, rootPath, context);
                             paths.Add(bundleFile);
                         }
 
-                        string key = fileName.ToMd5Fingerprint();
+                        string key = fileName.ToMd5Fingerprint() + Bundler.DOT_BUNDLE;
                         List<string> bundleFiles = CacheManager.GetItem(key) as List<string>;
                         if (bundleFiles == null) {
                             bundleFile = bundleFile ?? ResourceHelper.GetFilePath(fileName, rootPath, context);
@@ -55,7 +57,7 @@ namespace Bundler.Helpers {
                                     if (lines[i].StartsWith("#")) {
                                         // Comment
                                         continue;
-                                    } else if (Path.GetExtension(lines[i]) == ".bundle") {
+                                    } else if (Path.GetExtension(lines[i]).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
                                         // Resolve nested bundle
                                         var nestedBundle = ResourceHelper.GetFilePath(lines[i], dir, context);
                                         bundleFiles.AddRange(ExpandBundles(context, keepBundle, Path.GetDirectoryName(nestedBundle), nestedBundle));
@@ -140,7 +142,7 @@ namespace Bundler.Helpers {
         public static string GetResourceAsString(string resourceName, Assembly assembly) {
             using (Stream stream = assembly.GetManifestResourceStream(resourceName)) {
                 if (stream == null) {
-                    throw new NullReferenceException(string.Format("Resource with name '{0}' is null", resourceName));
+                    throw new NullReferenceException($"Resource with name '{resourceName}' is null");
                 }
 
                 using (var reader = new StreamReader(stream)) {
@@ -150,37 +152,27 @@ namespace Bundler.Helpers {
         }
 
         /// <summary>
-        /// The create resource physical file.
-        /// </summary>
-        /// <param name="fileName">
-        /// The file name.
-        /// </param>
-        /// <param name="fileContent">
-        /// The file content.
-        /// </param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        public static async Task<string> CreateResourcePhysicalFileAsync(string fileName, string fileContent) {
-            // Cache item to ensure that checking file's creation date is performed only every xx hours
-            string cacheIdCheckCreationDate = $"_CruncherCheckFileCreationDate_{fileName}";
-            const int CheckCreationDateFrequencyHours = 6;
+        /// Gets or creates the specified file.
+        /// </summary><param name="fileName">The file name.</param>
+        /// <param name="fileContent">The file content.</param>
+        /// <returns>The virtual path to the file.</returns>
+        public static async Task<string> GetOrCreateFileAsync(string fileName, string fileContent) {
+            var outputpath = Path.GetExtension(fileName).Equals(Bundler.DOT_JS, StringComparison.OrdinalIgnoreCase) ? BundlerSettings.Current.ScriptOutputPath : BundlerSettings.Current.StyleOutputPath;
 
-            // Cache item to ensure that checking whether the file exists is performed only every xx hours
-            string cacheIdCheckFileExists = $"_CruncherCheckFileExists_{fileName}";
-
-            string fileVirtualPath = VirtualPathUtility.AppendTrailingSlash(BundlerSettings.Current.OutputPath) + fileName;
+            string fileVirtualPath = VirtualPathUtility.AppendTrailingSlash(outputpath) + fileName;
             string filePath = HostingEnvironment.MapPath(fileVirtualPath);
 
             // Trims the physical files folder ensuring that it does not contains files older than xx days 
             // This is performed before creating the physical resource file
-            await TrimPhysicalFilesFolderAsync(HostingEnvironment.MapPath(BundlerSettings.Current.OutputPath));
+            TrimFolder(HostingEnvironment.MapPath(outputpath));
 
             // Check whether the resource file already exists
             if (filePath != null) {
-                // In order to avoid checking whether the file exists for every request (for a very busy site could be be thousands of requests per minute)
-                // a new cache item is added that will expire in a minute is created. That means that if the file is deleted (what should never happen) then it will be recreated after one minute.
-                // With this improvement IO operations are reduced to one per minute for already existing files
+
+                // In order to avoid checking whether the file exists for every request (for a very busy site could be be thousands of requests per minute), we add a new cache item that will expire in a minute. 
+                // That means that if the file is deleted (which should never happen) then it will be recreated after a minute.
+                // With this improvement IO operations are reduced to one per minute for already existing files.
+                string cacheIdCheckFileExists = $"_BundlerCheckFileExists_{fileName}";
                 if (CacheManager.GetItem(cacheIdCheckFileExists) == null) {
                     CacheItemPolicy policycacheIdCheckFileExists = new CacheItemPolicy {
                         SlidingExpiration = TimeSpan.FromMinutes(1),
@@ -190,10 +182,11 @@ namespace Bundler.Helpers {
 
                     FileInfo fileInfo = new FileInfo(filePath);
                     if (fileInfo.Exists) {
-                        // The resource file exists but it is necessary from time to time to update the file creation date 
-                        // in order to avoid the file to be deleted by the clean up process.
-                        // To know whether the check has been performed (in order to avoid executing this check everytime) creates 
-                        // a cache item that will expire in 12 hours.
+                        // Cache item to ensure that checking file's creation date is performed only every xx hours
+                        string cacheIdCheckCreationDate = $"_BundlerCheckFileCreationDate_{fileName}";
+
+                        // The resource file exists but it is necessary from time to time to update the file creation date in order to avoid the file to be deleted by the clean up process.
+                        // To know whether the check has been performed (in order to avoid executing this check everytime) we create a cache item that will expire in 12 hours.
                         if (CacheManager.GetItem(cacheIdCheckCreationDate) == null) {
                             File.SetLastWriteTimeUtc(filePath, DateTime.UtcNow);
 
@@ -207,7 +200,7 @@ namespace Bundler.Helpers {
                     } else {
                         // The resource file doesn't exist 
                         // Make sure that the directory exists
-                        string directoryPath = HostingEnvironment.MapPath(BundlerSettings.Current.OutputPath);
+                        string directoryPath = HostingEnvironment.MapPath(outputpath);
                         if (directoryPath != null) {
                             DirectoryInfo directoryInfo = new DirectoryInfo(directoryPath);
                             if (!directoryInfo.Exists) {
@@ -218,15 +211,8 @@ namespace Bundler.Helpers {
 
                         // Write the file asynchronously.
                         byte[] encodedText = Encoding.UTF8.GetBytes(fileContent);
-
                         using (
-                            FileStream sourceStream = new FileStream(
-                                filePath,
-                                FileMode.Create,
-                                FileAccess.Write,
-                                FileShare.None,
-                                4096,
-                                true)) {
+                            FileStream sourceStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true)) {
                             await sourceStream.WriteAsync(encodedText, 0, encodedText.Length);
                         }
                     }
@@ -238,34 +224,22 @@ namespace Bundler.Helpers {
         }
 
         /// <summary>
-        /// Trims the physical files folder ensuring that it does not contains files older than xx days 
+        /// Trims the specified folder ensuring that it does not contains files older than <see cref="BundlerSettings.DaysToKeepFiles"/> days.
         /// </summary>
-        /// <param name="path">
-        /// The path to the folder.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        public static async Task TrimPhysicalFilesFolderAsync(string path) {
+        /// <param name="path">The path to the folder.</param>
+        public static void TrimFolder(string path) {
             // If PhysicalFilesDaysBeforeRemoveExpired is 0 or negative then the trim process is not performed
             if (BundlerSettings.Current.DaysToKeepFiles < 1) {
                 return;
             }
 
-            // Settings for the clean up process
-            const string CacheIdTrimPhysicalFilesFolder = "_CruncherTrimPhysicalFilesFolder";
-            const string CacheIdTrimPhysicalFilesFolderAppPoolRecycled = "_CruncherTrimPhysicalFilesFolderAppPoolRecycled";
-            const int TrimPhysicalFilesFolderDelayedExecutionMin = 5;
-            const int TrimPhysicalFilesFolderFrequencyHours = 7;
-
             CacheItemPolicy policy = new CacheItemPolicy {
                 Priority = CacheItemPriority.NotRemovable
             };
 
-            // To know whether the trim process has already been performed (in order to avoid executing this process everytime) creates 
-            // a cache item that will expire in 12 hours. 
-            // To avoid that the cleanup process is run just after an App_Pool Recycle (or cache recycle) it uses another cache item that will never expire
-            // The main reason is because after an AppPool reset there are a lot of things going on and it is not the optimal moment to perform many I/O ops
+            // To know whether the trim process has already been performed (in order to avoid executing this process everytime) we create a cache item that will expire in 12 hours. 
+            // To avoid that the cleanup process is run just after an App_Pool Recycle (or cache recycle) it uses another cache item that will never expire.
+            // The main reason is because after an AppPool reset there are a lot of things going on and it is not the optimal moment to perform many I/O ops.
             if (CacheManager.GetItem(CacheIdTrimPhysicalFilesFolderAppPoolRecycled) == null) {
                 // Creates the cache item that will expire first
                 policy.SlidingExpiration = TimeSpan.FromMinutes(TrimPhysicalFilesFolderDelayedExecutionMin);
@@ -286,12 +260,10 @@ namespace Bundler.Helpers {
             CacheManager.AddItem(CacheIdTrimPhysicalFilesFolder, "1", policy);
 
             if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path)) {
-                DirectoryInfo directoryInfo = new DirectoryInfo(path);
 
-                // Regular expression to get resource files which names match Bundler's filename pattern.
-                IEnumerable<FileInfo> files = await directoryInfo.EnumerateFilesAsync();
-                files = files.Where(f => PhysicalFileRegex.IsMatch(Path.GetFileName(f.Name)))
-                             .OrderBy(f => f.CreationTimeUtc);
+                // Get resource files which names match Bundler's filename pattern.
+                IEnumerable<FileInfo> files = new DirectoryInfo(path).EnumerateFiles();
+                files = files.Where(f => f.Extension.Equals(Bundler.DOT_CSS, StringComparison.OrdinalIgnoreCase) || f.Extension.Equals(Bundler.DOT_JS, StringComparison.OrdinalIgnoreCase)).OrderBy(f => f.CreationTimeUtc);
                 int maxDays = BundlerSettings.Current.DaysToKeepFiles;
 
                 foreach (FileInfo fileInfo in files) {

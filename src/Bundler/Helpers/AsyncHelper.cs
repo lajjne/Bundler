@@ -28,7 +28,7 @@ namespace Bundler.Helpers {
         /// <see cref="Type"/> that is the result of the task.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="TResult"/>.
+        /// The result.
         /// </returns>
         public static TResult RunSync<TResult>(Func<Task<TResult>> func) {
             return MyTaskFactory

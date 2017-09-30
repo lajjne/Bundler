@@ -9,7 +9,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
 
     /// <summary>
     /// The auto prefixer processor.
-    /// Many thanks here to Taritsyn's <see href="https://bundletransformer.codeplex.com/"/>
+    /// <see href="https://github.com/Taritsyn/BundleTransformer/tree/master/src/BundleTransformer.Autoprefixer"/>
     /// </summary>
     internal sealed class AutoPrefixerProcessor : IDisposable {
         /// <summary>

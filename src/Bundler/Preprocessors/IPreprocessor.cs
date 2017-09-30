@@ -13,8 +13,8 @@
         /// </summary>
         /// <param name="input">The input string to transform.</param>
         /// <param name="path">The path to the given input string to transform.</param>
-        /// <param name="cruncher">The cruncher that is running the transform.</param>
+        /// <param name="bundler">The bundler that is running the transform.</param>
         /// <returns>The transformed string.</returns>
-        string Transform(string input, string path, BundlerBase cruncher);
+        string Transform(string input, string path, BundlerBase bundler);
     }
 }

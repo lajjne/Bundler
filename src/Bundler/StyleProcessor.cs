@@ -14,6 +14,7 @@ namespace Bundler {
     /// The CSS processor for processing CSS files.
     /// </summary>
     public class StyleProcessor : ProcessorBase {
+        
         /// <summary>
         /// Ensures processing is atomic.
         /// </summary>
@@ -32,7 +33,7 @@ namespace Bundler {
             string combinedCSS = string.Empty;
 
             if (paths != null) {
-                string key = string.Join(string.Empty, paths).ToMd5Fingerprint();
+                string key = string.Concat(paths).ToMd5Fingerprint() + (minify ? Bundler.DOT_MIN : "");
 
                 using (await Locker.LockAsync(key)) {
                     combinedCSS = (string)CacheManager.GetItem(key);
@@ -53,8 +54,8 @@ namespace Bundler {
                         StringBuilder stringBuilder = new StringBuilder();
                         foreach (string path in paths) {
 
-                            // Watch .bundle file
-                            if (Path.GetExtension(path) == ".bundle") {
+                            // watch .bundle file
+                            if (Path.GetExtension(path).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
                                 bundler.AddFileMonitor(path);
                                 continue;
                             }
@@ -65,8 +66,8 @@ namespace Bundler {
                                     options.RootFolder = Path.GetDirectoryName(filePath);
                                     var result = await bundler.ProcessAsync(filePath);
 
-                                    // Minify (unless already minified)
-                                    if (minify && !filePath.Contains(".min", StringComparison.OrdinalIgnoreCase)) {
+                                    // minify (unless already minified)
+                                    if (minify && !filePath.Contains(Bundler.DOT_MIN, StringComparison.OrdinalIgnoreCase)) {
                                         result = bundler.Minify(result);
                                     }
 
@@ -77,10 +78,10 @@ namespace Bundler {
 
                         combinedCSS = stringBuilder.ToString();
 
-                        // Apply autoprefixer
+                        // apply autoprefixer
                         combinedCSS = bundler.AutoPrefix(combinedCSS, BundlerSettings.Current.AutoPrefixerOptions);
 
-                        this.AddItemToCache(key, combinedCSS, bundler.FileMonitors);
+                        AddItemToCache(key, combinedCSS, bundler.FileMonitors);
                     }
                 }
             }

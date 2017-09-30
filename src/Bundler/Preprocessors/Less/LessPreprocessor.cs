@@ -1,5 +1,4 @@
 ﻿using dotless.Core;
-using dotless.Core.configuration;
 using dotless.Core.Importers;
 using dotless.Core.Input;
 using dotless.Core.Parser;
@@ -12,14 +11,19 @@ using System.Web.Hosting;
 namespace Bundler.Preprocessors.Less {
 
     /// <summary>
-    /// Provides methods to convert LESS into CSS.
+    /// Provides methods to compile LESS into CSS.
     /// </summary>
     public class LessPreprocessor : IPreprocessor {
 
         /// <summary>
+        /// File extension for less files.
+        /// </summary>
+        private string DOT_LESS = ".less";
+
+        /// <summary>
         /// Gets the extension that this filter processes.
         /// </summary>
-        public string[] AllowedExtensions => new[] { ".less" };
+        public string[] AllowedExtensions => new[] { DOT_LESS };
 
         /// <summary>
         /// Transforms the content of the given string from Less into CSS. 
@@ -34,11 +38,19 @@ namespace Bundler.Preprocessors.Less {
             LessPathResolver dotLessPathResolver = new LessPathResolver(path);
             FileReader fileReader = new FileReader(dotLessPathResolver);
             parser.Importer = new Importer(fileReader);
-            // NOTE: ScriptProcessor minifies the compiled css if needed
-            ILessEngine lessEngine = new LessEngine(parser) { Compress = false };
+
+            var lessEngine = new LessEngine(parser) {
+                KeepFirstSpecialComment = !bundler.Options.Minify,
+                DisableVariableRedefines = false,
+                Compress = false
+            };
 
             try {
                 string result = lessEngine.TransformToCss(input, path);
+                if (!lessEngine.LastTransformationSuccessful) {
+                    throw lessEngine.LastTransformationError; 
+                }
+
                 if (bundler.Options.WatchFiles) {
                     // Add each import as a file dependency
                     IEnumerable<string> imports = lessEngine.GetImports();
@@ -55,7 +67,7 @@ namespace Bundler.Preprocessors.Less {
 
                 return result;
             } catch (Exception ex) {
-                throw new LessCompilingException(ex.Message, ex.InnerException);
+                throw ex;
             }
         }
     }

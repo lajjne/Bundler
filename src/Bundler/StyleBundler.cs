@@ -1,20 +1,14 @@
 ﻿using Bundler.Compression;
-using Bundler.Extensions;
-using Bundler.Helpers;
 using Bundler.Postprocessors.AutoPrefixer;
 using Bundler.Preprocessors;
-using System;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 
 namespace Bundler {
 
     /// <summary>
-    /// The css cruncher.
+    /// The css bundler.
     /// </summary>
     public class StyleBundler : BundlerBase {
 
@@ -27,7 +21,7 @@ namespace Bundler {
         /// Initializes a new instance of the <see cref="StyleBundler"/> class.
         /// </summary>
         /// <param name="options">
-        /// The options containing instructions for the cruncher.
+        /// The options containing instructions for the bundler.
         /// </param>
         /// <param name="context">
         /// The current context.

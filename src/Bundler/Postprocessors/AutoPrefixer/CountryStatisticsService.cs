@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Bundler.Helpers;
 
 namespace Bundler.Postprocessors.AutoPrefixer {
@@ -12,9 +11,9 @@ namespace Bundler.Postprocessors.AutoPrefixer {
     /// </summary>
     public sealed class CountryStatisticsService {
         /// <summary>
-        /// Name of directory, which contains a Autoprefixer country statistics
+        /// Name of directory, which contains Autoprefixer country statistics
         /// </summary>
-        private const string AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME = "Postprocessors.AutoPrefixer.Resources.CountryStatistics";
+        private const string AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME = ".Resources.CountryStatistics.";
 
         /// <summary>
         /// Set of country codes for which there are statistics
@@ -30,37 +29,21 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// <summary>
         /// Gets a instance of country statistics service
         /// </summary>
-        public static CountryStatisticsService Instance {
-            get { return _instance.Value; }
-        }
-
+        public static CountryStatisticsService Instance => _instance.Value;
 
         /// <summary>
         /// Constructs a instance of country statistics service
         /// </summary>
         private CountryStatisticsService() {
-            string[] allResourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-            string countryResourcePrefix = AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + ".";
+            var type = GetType();
+            string[] allResourceNames = type.Assembly.GetManifestResourceNames();
+            string countryResourcePrefix = type.Namespace + AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME;
             int countryResourcePrefixLength = countryResourcePrefix.Length;
             string[] countryCodes = allResourceNames
                 .Where(r => r.StartsWith(countryResourcePrefix, StringComparison.Ordinal))
                 .Select(r => Path.GetFileNameWithoutExtension(r.Substring(countryResourcePrefixLength)))
                 .ToArray();
-
             _countryCodes = new HashSet<string>(countryCodes);
-        }
-
-
-        /// <summary>
-        /// Determines whether the statistics database contains the specified country
-        /// </summary>
-        /// <param name="countryCode">Two-letter country code</param>
-        /// <returns>true if the statistics database contains an country with the specified code;
-        /// otherwise, false</returns>
-        public bool ContainsCountry(string countryCode) {
-            bool result = _countryCodes.Contains(countryCode);
-
-            return result;
         }
 
         /// <summary>
@@ -69,14 +52,23 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// <param name="countryCode">Two-letter country code</param>
         /// <returns>Statistics for country</returns>
         public string GetStatisticsForCountry(string countryCode) {
-            string statistics;
             try {
-                statistics = ResourceHelper.GetResourceAsString(AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + "." + countryCode + ".json", GetType().Assembly);
+                var type = GetType();
+                return ResourceHelper.GetResourceAsString(type.Namespace + AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + countryCode + ".json", type.Assembly);
             } catch (NullReferenceException) {
-                throw new AutoPrefixerProcessingException(
-                    string.Format("Could not find the statistics for country code '{0}'", countryCode));
+                throw new AutoPrefixerProcessingException($"Could not find the statistics for country code '{countryCode}'");
             }
-            return statistics;
         }
+
+        /// <summary>
+        /// Determines whether the statistics database contains the specified country
+        /// </summary>
+        /// <param name="countryCode">Two-letter country code</param>
+        /// <returns>true if the statistics database contains an country with the specified code;
+        /// otherwise, false</returns>
+        public bool ContainsCountry(string countryCode) {
+            return _countryCodes.Contains(countryCode);
+        }
+
     }
 }
