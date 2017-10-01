@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
-using System.Web.Mvc;
 
 namespace Bundler {
 
@@ -74,12 +73,11 @@ namespace Bundler {
         /// Renders the correct html to create a script tag linking to the bundled JavaScript representing the given file.
         /// </summary>
         /// <param name="fileName">The .js file to create a script tag for.</param>
-        /// <param name="htmlAttributes"></param>
-        /// <param name="loading">The <see cref="ScriptLoading"/> describing the way the browser should load the JavaScript into the page.</param>
+        /// <param name="htmlAttributes">Anonymous object with hmtl attributes</param>
         /// <param name="output">Decides how to combine and/or minify the given file.</param>
         /// <returns>A <see cref="HtmlString"/> containing the script tag for javascript file.</returns>
-        public static HtmlString Scripts(string fileName, object htmlAttributes = null, ScriptLoading? loading = null, BundleOutput? output = null) {
-            return Scripts(new string[] { fileName }, htmlAttributes, loading, output);
+        public static HtmlString Scripts(string fileName, object htmlAttributes = null, BundleOutput? output = null) {
+            return Scripts(new string[] { fileName }, htmlAttributes, output);
         }
 
         /// <summary>
@@ -87,26 +85,12 @@ namespace Bundler {
         /// </summary>
         /// <param name="fileNames">The .js files to create script tag(s) for.</param>
         /// <param name="htmlAttributes"></param>
-        /// <param name="loading">The <see cref="ScriptLoading"/> describing the way the browser should load the JavaScript into the page.</param>
         /// <param name="output">Decides how to combine and/or minify the given file.</param>
         /// <returns>A <see cref="HtmlString"/> containing the script tag(s) for the specified javascript files.</returns>
-        public static HtmlString Scripts(string[] fileNames, object htmlAttributes = null, ScriptLoading? loading = null, BundleOutput? output = null) {
-            loading = loading ?? ScriptLoading.Inline;
+        public static HtmlString Scripts(string[] fileNames, object htmlAttributes = null, BundleOutput? output = null) {
             output = output ?? GetDefaultBundleOutput();
-
-            var rvd = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
+            var attributes = htmlAttributes.ToNameValueCollection().AsHtmlAttributes(prefix: " ");
             StringBuilder sb = new StringBuilder();
-            foreach (var attribute in rvd) {
-                string key = attribute.Key;
-                string val = HttpUtility.HtmlAttributeEncode(attribute.Value.ToString());
-                sb.Append(' ').Append(key).Append("=\"").Append(val).Append('\"');
-            }
-            if (loading != ScriptLoading.Inline) {
-                sb.Append(' ').Append(loading.ToString().ToLowerInvariant());
-            }
-            string attributes = sb.ToString();
-
-            sb = new StringBuilder();
             foreach (var url in ScriptUrls(fileNames, output.Value)) {
                 sb.AppendFormat(SCRIPT_TEMPLATE, url, attributes).AppendLine();
             }
@@ -146,14 +130,14 @@ namespace Bundler {
             string ext = minified ? DOT_MIN + DOT_JS : DOT_JS;
             var context = HttpContext.Current;
             if (combined) {
-                // Combine files
+                // combine files
                 string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, minified, fileNames));
                 if (!string.IsNullOrWhiteSpace(fileContent)) {
                     string fileName = $"{fileContent.ToMd5Fingerprint()}{ext}";
                     yield return AsyncHelper.RunSync(() => ResourceHelper.GetOrCreateFileAsync(fileName, fileContent));
                 }
             } else {
-                // Render file(s) individually (but first expand .bundle files)
+                // render file(s) individually (but first expand .bundle files)
                 fileNames = ResourceHelper.ExpandBundles(context, false, null, fileNames);
                 foreach (string name in fileNames) {
                     string fileContent = AsyncHelper.RunSync(() => ScriptProcessor.ProcessJavascriptCrunchAsync(context, minified, name));
@@ -201,18 +185,11 @@ namespace Bundler {
             bool minified = output == BundleOutput.Minified || output == BundleOutput.MinifiedAndCombined;
             string ext = minified ? DOT_MIN + DOT_CSS : DOT_CSS;
 
-            var rvd = HtmlHelper.AnonymousObjectToHtmlAttributes(htmlAttributes);
-            StringBuilder sb = new StringBuilder();
-            foreach (var attribute in rvd) {
-                string key = attribute.Key;
-                string val = HttpUtility.HtmlAttributeEncode(attribute.Value.ToString());
-                sb.Append(' ').Append(key).Append("=\"").Append(val).Append('\"');
-            }
-            string attributes = sb.ToString();
+            var attributes = htmlAttributes.ToNameValueCollection().AsHtmlAttributes(suffix: " ");
 
             HttpContext context = HttpContext.Current;
             if (combined) {
-                // Combine files
+                // combine files
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, minified, fileNames));
                 if (!string.IsNullOrWhiteSpace(fileContent)) {
                     string fileName = $"{fileContent.ToMd5Fingerprint()}{ext}";
@@ -221,7 +198,7 @@ namespace Bundler {
                         attributes));
                 }
             } else {
-                // Render file(s) individually (but first expand .bundle files)
+                // render file(s) individually (but first expand .bundle files)
                 StringBuilder stringBuilder = new StringBuilder();
                 fileNames = ResourceHelper.ExpandBundles(context, false, null, fileNames);
                 foreach (string name in fileNames) {

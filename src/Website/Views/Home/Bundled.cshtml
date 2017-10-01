@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Bundled</title>
     @Bundler.Styles("/styles/style.bundle", output: BundleOutput.Minified)
-    @Bundler.Styles(new string[] { "/styles/style.css", "/styles/imports/style2.css", "/styles/imports/style3.min.css" }, output: BundleOutput.Combined)
+    @Bundler.Styles(new string[] { "/styles/style.css", "/styles/imports/style2.css", "/styles/imports/style3.min.css" }, new { data_turbolinks_track = "reload" }, output: BundleOutput.Combined)
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -42,6 +42,6 @@
             <div class="test-absolute-relative-path-image"></div>
         </main>
     </div>
-    @Bundler.Scripts("/scripts/script.bundle", output: BundleOutput.MinifiedAndCombined)
+    @Bundler.Scripts("/scripts/script.bundle", new { data_turbolinks_eval = "false", async = "" }, output: BundleOutput.MinifiedAndCombined)
 </body>
 </html>
