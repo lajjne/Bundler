@@ -7,7 +7,7 @@ using Bundler.Helpers;
 namespace Bundler.Postprocessors.AutoPrefixer {
 
     /// <summary>
-    /// Country statistics service
+    /// Country statistics service, <see cref="https://github.com/Taritsyn/BundleTransformer/blob/master/src/BundleTransformer.Autoprefixer/Internal/CountryStatisticsService.cs"/>.
     /// </summary>
     public sealed class CountryStatisticsService {
         /// <summary>
@@ -54,7 +54,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         public string GetStatisticsForCountry(string countryCode) {
             try {
                 var type = GetType();
-                return ResourceHelper.GetResourceAsString(type.Namespace + AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + countryCode + ".json", type.Assembly);
+                return ResourceHelper.GetResourceAsString(type.Namespace + AUTOPREFIXER_COUNTRY_STATISTICS_DIRECTORY_NAME + countryCode + ".js", type.Assembly);
             } catch (NullReferenceException) {
                 throw new AutoPrefixerProcessingException($"Could not find the statistics for country code '{countryCode}'");
             }

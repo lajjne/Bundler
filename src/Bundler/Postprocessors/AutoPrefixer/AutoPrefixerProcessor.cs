@@ -1,15 +1,18 @@
-﻿using JavaScriptEngineSwitcher.Core;
+﻿using Bundler.Helpers;
+using JavaScriptEngineSwitcher.Core;
 using JavaScriptEngineSwitcher.Core.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.IO;
 using System.Text;
+using System.Web;
 
 namespace Bundler.Postprocessors.AutoPrefixer {
 
     /// <summary>
-    /// The auto prefixer processor.
-    /// <see href="https://github.com/Taritsyn/BundleTransformer/tree/master/src/BundleTransformer.Autoprefixer"/>
+    /// The auto prefixer processor, <see href="https://github.com/Taritsyn/BundleTransformer/tree/master/src/BundleTransformer.Autoprefixer"/>.
+    /// To update resources, download and build https://github.com/Taritsyn/BundleTransformer. Then simply copy the resource files.
     /// </summary>
     internal sealed class AutoPrefixerProcessor : IDisposable {
         /// <summary>
@@ -30,7 +33,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// <summary>
         /// Name of variable, which contains a country statistics service
         /// </summary>
-        private const string COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME = "CountryStatisticsService";
+        private const string COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME = nameof(CountryStatisticsService);
 
         /// <summary>
         /// The sync root for locking against.
@@ -50,14 +53,6 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// <summary>
         /// A value indicating whether this instance of the given entity has been disposed.
         /// </summary>
-        /// <value><see langword="true"/> if this instance has been disposed; otherwise, <see langword="false"/>.</value>
-        /// <remarks>
-        /// If the entity is disposed, it must not be disposed a second
-        /// time. The isDisposed field is set the first time the entity
-        /// is disposed. If the isDisposed field is true, then the Dispose()
-        /// method will not dispose again. This help not to prolong the entity's
-        /// life in the Garbage Collector.
-        /// </remarks>
         private bool _disposed;
 
         /// <summary>
@@ -65,7 +60,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// </summary>
         public AutoPrefixerProcessor() {
             // TODO: maybe pass in engine name if default engine is not what we need
-            this._jsEngine = JsEngineSwitcher.Instance.CreateDefaultEngine();
+            _jsEngine = JsEngineSwitcher.Instance.CreateDefaultEngine();
         }
 
         /// <summary>
@@ -82,7 +77,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
             // Do not re-create Dispose clean-up code here.
             // Calling Dispose(false) is optimal in terms of
             // readability and maintainability.
-            this.Dispose(false);
+            Dispose(false);
         }
 
         /// <summary>
@@ -101,10 +96,10 @@ namespace Bundler.Postprocessors.AutoPrefixer {
             string processedCode;
 
             lock (_syncRoot) {
-                this.Initialize();
+                Initialize();
 
                 try {
-                    string result = this._jsEngine.Evaluate<string>(string.Format(CompilationFunctionCallTemplate, JsonConvert.SerializeObject(input), ConvertAutoPrefixerOptionsToJson(options)));
+                    string result = _jsEngine.Evaluate<string>(string.Format(CompilationFunctionCallTemplate, JsonConvert.SerializeObject(input), ConvertAutoPrefixerOptionsToJson(options)));
 
                     JObject json = JObject.Parse(result);
                     JArray errors = json["errors"] as JArray;
@@ -126,7 +121,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// Disposes the object and frees resources for the Garbage Collector.
         /// </summary>
         public void Dispose() {
-            this.Dispose(true);
+            Dispose(true);
 
             // This object will be cleaned up by the Dispose method.
             // Therefore, you should call GC.SuppressFinalize to
@@ -149,13 +144,32 @@ namespace Bundler.Postprocessors.AutoPrefixer {
                 new JProperty("remove", options.Remove),
                 new JProperty("supports", options.Supports),
                 new JProperty("flexbox", options.Flexbox),
-                new JProperty("grid", options.Grid)
+                new JProperty("grid", options.Grid),
+                new JProperty("stats", GetCustomStatisticsFromFile(options.Stats))
             );
             return optionsJson;
         }
 
         /// <summary>
-        /// Generates a detailed error message
+        /// Gets a custom statistics from specified file
+        /// </summary>
+        /// <param name="path">Virtual path to file, that contains custom statistics.</param>
+        /// <returns>Custom statistics in JSON format</returns>
+        private static JObject GetCustomStatisticsFromFile(string path) {
+            if (path == null) {
+                return null;
+            }
+
+            path = ResourceHelper.GetFilePath(path, null, HttpContext.Current);
+            if (!File.Exists(path)) {
+                throw new FileNotFoundException("Custom usage statistics not found.", path);
+            }
+
+            return JObject.Parse(File.ReadAllText(path));
+        }
+
+        /// <summary>
+        /// Generates a detailed error message.
         /// </summary>
         /// <param name="errorDetails">Error details</param>
         /// <returns>Detailed error message</returns>
@@ -185,38 +199,38 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// </summary>
         /// <param name="disposing">If true, the object gets disposed.</param>
         private void Dispose(bool disposing) {
-            if (this._disposed) {
+            if (_disposed) {
                 return;
             }
 
             if (disposing) {
-                if (this._jsEngine != null) {
-                    this._jsEngine.RemoveVariable(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME);
-                    this._jsEngine.Dispose();
-                    this._jsEngine = null;
+                if (_jsEngine != null) {
+                    _jsEngine.RemoveVariable(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME);
+                    _jsEngine.Dispose();
+                    _jsEngine = null;
                 }
             }
 
             // Call the appropriate methods to clean up
             // unmanaged resources here.
             // Note disposing is done.
-            this._disposed = true;
+            _disposed = true;
         }
 
         /// <summary>
         /// Initializes CSS autoprefixer
         /// </summary>
         private void Initialize() {
-            if (!this._initialized) {
+            if (!_initialized) {
 
-                this._jsEngine.EmbedHostObject(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME, CountryStatisticsService.Instance);
+                _jsEngine.EmbedHostObject(COUNTRY_STATISTICS_SERVICE_VARIABLE_NAME, CountryStatisticsService.Instance);
 
-                Type type = this.GetType();
+                Type type = GetType();
 
-                this._jsEngine.ExecuteResource(AutoPrefixerLibraryResource, type);
-                this._jsEngine.ExecuteResource(AutoPrefixerHelperResource, type);
+                _jsEngine.ExecuteResource(AutoPrefixerLibraryResource, type);
+                _jsEngine.ExecuteResource(AutoPrefixerHelperResource, type);
 
-                this._initialized = true;
+                _initialized = true;
             }
         }
     }

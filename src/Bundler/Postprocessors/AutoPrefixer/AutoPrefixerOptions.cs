@@ -19,6 +19,7 @@ namespace Bundler.Postprocessors.AutoPrefixer {
             Grid = true;
             Remove = true;
             Supports = true;
+            Stats = null;
         }
 
         /// <summary>
@@ -61,5 +62,10 @@ namespace Bundler.Postprocessors.AutoPrefixer {
         /// Gets or sets a flag for whether to add prefixes for <code>@supports</code> parameters.
         /// </summary>
         public bool Supports { get; set; }
+
+        /// <summary>
+		/// Gets or sets a virtual path to file, that contains custom usage statistics for <code>&gt; 10% in my stats</code> browsers query.
+		/// </summary>
+		public string Stats { get; set; }
     }
 }
