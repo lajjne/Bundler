@@ -79,26 +79,21 @@ namespace Bundler.Compression {
         /// <returns>The required CodeSettings class needed for the Ajax Minifier.</returns>
         private CodeSettings CreateCodeSettings() {
             CodeSettings codeSettings = new CodeSettings {
-                MinifyCode = this.ShouldMinifyCode,
-                OutputMode = this.RemoveWhiteSpace ? OutputMode.SingleLine : OutputMode.MultipleLines,
+                MinifyCode = ShouldMinifyCode,
+                OutputMode = RemoveWhiteSpace ? OutputMode.SingleLine : OutputMode.MultipleLines,
             };
 
             if (ShouldMinifyCode) {
                 // determine variable renaming
                 codeSettings.LocalRenaming = LocalRenaming;
 
-                // This is being set by default. A lot of scripts use eval to parse out various functions
-                // and objects. These names need to be kept consistent with the actual arguments.
+                // a lot of scripts use eval to parse out various functions and objects, these names need to be kept consistent with the actual arguments
                 codeSettings.EvalTreatment = EvalTreatment.Ignore;
 
-                // This makes sure that function names on objects are kept exactly as they are. This is
-                // so functions that other non-minified scripts rely on do not get renamed.
-                codeSettings.PreserveFunctionNames = this.PreserveFunctionNames;
+                // this makes sure that function names on objects are kept exactly as they are (so functions that other non-minified scripts rely on do not get renamed)
+                codeSettings.PreserveFunctionNames = PreserveFunctionNames;
 
-                // Specifies whether or not important comments will be retained in the output. 
-                // Important comments are frequently used by developers to specify copyright or licensing 
-                // information that needs to be retained in distributed scripts.
-                // e.g /*! This is important */
+                // specifies whether or not important comments will be retained in the output
                 codeSettings.PreserveImportantComments = false;
             }
 

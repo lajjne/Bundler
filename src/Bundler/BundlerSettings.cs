@@ -19,6 +19,7 @@ namespace Bundler {
             ScriptOutputPath = "~/js";
             StyleOutputPath = "~/css";
             WatchFiles = true;
+            WatchAlways = new string[0];
         }
 
         /// <summary>
@@ -50,5 +51,10 @@ namespace Bundler {
         /// Gets or sets a value indicating whether to watch files included in a bundle for changes.
         /// </summary>
         public bool WatchFiles { get; set; }
+
+        /// <summary>
+        /// Gets or sets a list of files to always watch (even when <see cref="WatchFiles" /> is <c>false</c>).
+        /// </summary>
+       public string[] WatchAlways { get; set; }
     }
 }

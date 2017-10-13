@@ -18,7 +18,7 @@ namespace Bundler {
         /// <summary>
         /// Ensures processing is atomic.
         /// </summary>
-        private static readonly AsyncDuplicateLock Locker = new AsyncDuplicateLock();
+        private static readonly AsyncDuplicateLock _locker = new AsyncDuplicateLock();
 
         /// <summary>
         /// Processes the JavaScript request and returns the result.
@@ -33,26 +33,27 @@ namespace Bundler {
             if (paths != null) {
                 string key = string.Concat(paths).ToMd5Fingerprint() + (minify ? Bundler.DOT_MIN : "");
 
-                using (await Locker.LockAsync(key)) {
+                using (await _locker.LockAsync(key)) {
                     combinedJavaScript = (string)CacheManager.GetItem(key);
 
                     if (string.IsNullOrWhiteSpace(combinedJavaScript)) {
 
                         BundleOptions options = new BundleOptions {
                             Minify = minify,
-                            WatchFiles = BundlerSettings.Current.WatchFiles
+                            WatchFiles = BundlerSettings.Current.WatchFiles,
+                            WatchAlways = BundlerSettings.Current.WatchAlways
                         };
 
                         ScriptBundler bundler = new ScriptBundler(options, context);
 
-                        // Expand .bundle files
+                        // expand .bundle files
                         paths = ResourceHelper.ExpandBundles(context, true, null, paths);
 
-                        // Loop through and process each file
+                        // loop through and process each file
                         StringBuilder stringBuilder = new StringBuilder();
                         foreach (string path in paths) {
 
-                            // Watch .bundle file
+                            // watch .bundle file
                             if (Path.GetExtension(path).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
                                 bundler.AddFileMonitor(path);
                                 continue;
@@ -64,7 +65,7 @@ namespace Bundler {
                                     options.RootFolder = Path.GetDirectoryName(filePath);
                                     var result = await bundler.ProcessAsync(filePath);
 
-                                    // Minify (unless already minified)
+                                    // minify (unless already minified)
                                     if (minify && !filePath.Contains(Bundler.DOT_MIN, StringComparison.OrdinalIgnoreCase)) {
                                         result = bundler.Minify(result);
                                     }

@@ -36,7 +36,7 @@ namespace Bundler.Extensions {
             using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider()) {
                 byte[] hash = md5.ComputeHash(bytes);
 
-                // Concatenate the hash bytes into one long String
+                // concatenate the hash bytes into one long string
                 return hash.Aggregate(new StringBuilder(32), (sb, b) => sb.Append(b.ToString("X2", CultureInfo.InvariantCulture))).ToString().ToLowerInvariant();
             }
         }

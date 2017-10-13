@@ -17,7 +17,7 @@ namespace Bundler {
         /// <summary>
         /// The current context.
         /// </summary>
-        private readonly HttpContext context;
+        private readonly HttpContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BundlerBase"/> class.
@@ -25,19 +25,15 @@ namespace Bundler {
         /// <param name="options">The options containing instructions for the bundler.</param>
         /// <param name="context"></param>
         protected BundlerBase(BundleOptions options, HttpContext context) {
-            this.context = context;
-            this.Options = options;
-            this.FileMonitors = new ConcurrentBag<string>();
+            _context = context;
+            Options = options;
+            FileMonitors = new ConcurrentBag<string>();
         }
 
         /// <summary>
         /// Gets the current context.
         /// </summary>
-        public HttpContext Context {
-            get {
-                return context;
-            }
-        }
+        public HttpContext Context => _context;
 
         /// <summary>
         /// Gets or sets the options containing instructions for the bundler.
@@ -55,7 +51,7 @@ namespace Bundler {
         /// <param name="resource">The file or folder containing the resource(s) to bundle.</param>
         /// <returns>The bundled resource.</returns>
         public async Task<string> ProcessAsync(string resource) {
-            return await this.LoadFileAsync(resource);
+            return await LoadFileAsync(resource);
         }
 
         /// <summary>
@@ -63,9 +59,9 @@ namespace Bundler {
         /// </summary>
         /// <param name="file">The file to add to the monitors list.</param>
         public void AddFileMonitor(string file) {
-            // Cache if applicable.
-            if (this.Options.WatchFiles) {
-                this.FileMonitors.Add(file);
+            // watch file if applicable
+            if (Options.WatchFiles || Options.WatchAlways.Contains(file)) {
+                FileMonitors.Add(file);
             }
         }
 
@@ -84,7 +80,7 @@ namespace Bundler {
         protected virtual async Task<string> LoadFileAsync(string file) {
             string contents = string.Empty;
 
-            if (this.IsValidFile(file)) {
+            if (IsValidFile(file)) {
                 using (StreamReader streamReader = new StreamReader(file)) {
                     contents = await streamReader.ReadToEndAsync();
                 }

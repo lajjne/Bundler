@@ -18,7 +18,7 @@ namespace Bundler {
         /// <summary>
         /// Ensures processing is atomic.
         /// </summary>
-        private static readonly AsyncDuplicateLock Locker = new AsyncDuplicateLock();
+        private static readonly AsyncDuplicateLock _locker = new AsyncDuplicateLock();
 
         /// <summary>
         /// Processes the css request and returns the result.
@@ -35,14 +35,15 @@ namespace Bundler {
             if (paths != null) {
                 string key = string.Concat(paths).ToMd5Fingerprint() + (minify ? Bundler.DOT_MIN : "");
 
-                using (await Locker.LockAsync(key)) {
+                using (await _locker.LockAsync(key)) {
                     combinedCSS = (string)CacheManager.GetItem(key);
 
                     if (string.IsNullOrWhiteSpace(combinedCSS)) {
 
                         BundleOptions options = new BundleOptions {
                             Minify = minify,
-                            WatchFiles = BundlerSettings.Current.WatchFiles
+                            WatchFiles = BundlerSettings.Current.WatchFiles,
+                            WatchAlways = BundlerSettings.Current.WatchAlways
                         };
 
                         StyleBundler bundler = new StyleBundler(options, context);

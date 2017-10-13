@@ -47,7 +47,7 @@ namespace Bundler.Compression {
                     return string.Empty;
                 }
 
-                // The minifier is double escaping '\' when it finds it in the file.
+                // the minifier is double escaping '\' when it finds it in the file.
                 return Uglify.Css(styleSheet, CreateCssSettings()).Code.Replace(@"\5c\2e", @"\.");
             }
 
@@ -64,10 +64,10 @@ namespace Bundler.Compression {
             };
 
             if (ShouldMinify) {
-                // Color names
+                // color names
                 cssSettings.ColorNames = ColorNames;
 
-                // Do not keep any comments
+                // do not keep any comments
                 cssSettings.CommentMode = CssComment.None;
             }
 

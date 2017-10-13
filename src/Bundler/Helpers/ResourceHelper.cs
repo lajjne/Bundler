@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Caching;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Hosting;
@@ -19,62 +18,104 @@ namespace Bundler.Helpers {
     /// </summary>
     public class ResourceHelper {
 
-        private const int CheckCreationDateFrequencyHours = 6;
         private const string CacheIdTrimPhysicalFilesFolder = "_BundlerTrimPhysicalFilesFolder";
         private const string CacheIdTrimPhysicalFilesFolderAppPoolRecycled = "_BundlerTrimPhysicalFilesFolderAppPoolRecycled";
+        private const int CheckCreationDateFrequencyHours = 6;
         private const int TrimPhysicalFilesFolderDelayedExecutionMin = 5;
         private const int TrimPhysicalFilesFolderFrequencyHours = 7;
 
         /// <summary>
-        /// Expand .bundle files
+        /// Expand .bundle files.
         /// </summary>
-        /// <param name="context"></param>
-        /// <param name="keepBundle"></param>
-        /// <param name="rootPath"></param>
-        /// <param name="fileNames"></param>
+        /// <param name="context">The current context.</param>
+        /// <param name="keepBundle"><c>true</c> to include the .bundle file in the expanded list of files, otherwise <c>false</c>.</param>
+        /// <param name="rootPath">The root path to use when resolving file path for the specified resource.</param>
+        /// <param name="fileNames">The list of files to expand.</param>
         /// <returns></returns>
         public static string[] ExpandBundles(HttpContext context, bool keepBundle, string rootPath, params string[] fileNames) {
             if (fileNames.Any(x => Path.GetExtension(x).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase))) {
-                List<string> paths = new List<string>();
+                var monitors = new List<string>();
+                var paths = new List<string>();
+                string path = null;
                 foreach (var fileName in fileNames) {
                     if (Path.GetExtension(fileName).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
-                        string bundleFile = null;
+                        path = GetFilePath(fileName, rootPath, context);
+                        // watch .bundle file if applicable
+                        if (BundlerSettings.Current.WatchFiles || BundlerSettings.Current.WatchAlways.Contains(path)) {
+                            monitors.Add(path);
+                        }
+
                         if (keepBundle) {
-                            bundleFile = ResourceHelper.GetFilePath(fileName, rootPath, context);
-                            paths.Add(bundleFile);
+                            paths.Add(path);
                         }
 
                         string key = fileName.ToMd5Fingerprint() + Bundler.DOT_BUNDLE;
                         List<string> bundleFiles = CacheManager.GetItem(key) as List<string>;
                         if (bundleFiles == null) {
-                            bundleFile = bundleFile ?? ResourceHelper.GetFilePath(fileName, rootPath, context);
-                            if (File.Exists(bundleFile)) {
-                                // Add the filenames from the bundle
+                            path = path ?? GetFilePath(fileName, rootPath, context);
+                            if (File.Exists(path)) {
+                                // add files from the .bundle file
                                 bundleFiles = new List<string>();
-                                var lines = File.ReadAllLines(bundleFile);
-                                var dir = Path.GetDirectoryName(bundleFile);
+                                var dir = Path.GetDirectoryName(path);
+                                var lines = File.ReadAllLines(path);
+                                string line = null;
+                                int hash = -1;
+
                                 for (int i = 0; i < lines.Length; i++) {
-                                    if (lines[i].StartsWith("#")) {
-                                        // Comment
+                                    line = lines[i].Trim();
+                                    hash = line.IndexOf('#');
+                                    if (hash == 0) {
+                                        // lines starting with # are comments and can be skipped
                                         continue;
-                                    } else if (Path.GetExtension(lines[i]).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
-                                        // Resolve nested bundle
-                                        var nestedBundle = ResourceHelper.GetFilePath(lines[i], dir, context);
+                                    }
+
+                                    if (hash > 0) {
+                                        // keep only part before # comment
+                                        line = line.Substring(0, hash).Trim();
+                                    }
+
+                                    if (line.Length == 0) {
+                                        // skip empty lines
+                                        continue;
+                                    }
+
+                                    if (Path.GetExtension(line).Equals(Bundler.DOT_BUNDLE, StringComparison.OrdinalIgnoreCase)) {
+                                        // resolve nested bundle
+                                        var nestedBundle = GetFilePath(line, dir, context);
+                                        if (BundlerSettings.Current.WatchFiles || BundlerSettings.Current.WatchAlways.Contains(nestedBundle)) {
+                                            monitors.Add(nestedBundle);
+                                        }
+
                                         bundleFiles.AddRange(ExpandBundles(context, keepBundle, Path.GetDirectoryName(nestedBundle), nestedBundle));
                                     } else {
-                                        bundleFiles.Add(ResourceHelper.GetFilePath(lines[i], dir, context));
+                                        path = GetFilePath(line, dir, context);
+                                        if (File.Exists(path)) {
+                                            bundleFiles.Add(path);
+                                        } else {
+                                            throw new FileNotFoundException($"Could not locate {line} referenced in {fileName}", path);
+                                        }
                                     }
                                 }
 
-                                // Cache content of bundle
+                                // cache content of bundle
                                 CacheItemPolicy cacheItemPolicy = new CacheItemPolicy { Priority = CacheItemPriority.NotRemovable };
-                                cacheItemPolicy.ChangeMonitors.Add(new HostFileChangeMonitor(new string[] { bundleFile }));
+                                if (BundlerSettings.Current.WatchFiles || BundlerSettings.Current.WatchAlways.Any()) {
+                                    foreach (var bf in bundleFiles) {
+                                        if (BundlerSettings.Current.WatchFiles || BundlerSettings.Current.WatchAlways.Contains(bf)) {
+                                            monitors.Add(bf);
+                                        }
+                                    }
+                                    cacheItemPolicy.ChangeMonitors.Add(new HostFileChangeMonitor(monitors));
+                                }
                                 CacheManager.AddItem(key, bundleFiles, cacheItemPolicy);
+
+                            } else {
+                                throw new FileNotFoundException($"Could not locate {fileName}", path);
                             }
                         }
-                        if (bundleFiles != null) {
-                            paths.AddRange(bundleFiles);
-                        }
+
+                        paths.AddRange(bundleFiles);
+
                     } else {
                         paths.Add(fileName);
                     }

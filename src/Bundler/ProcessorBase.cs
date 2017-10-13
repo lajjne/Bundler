@@ -10,19 +10,12 @@ namespace Bundler {
     /// </summary>
     public abstract class ProcessorBase {
 
-
         /// <summary>
         /// Adds a resource to the cache.
         /// </summary>
-        /// <param name="key">
-        /// The filename of the item to add.
-        /// </param>
-        /// <param name="contents">
-        /// The contents of the file to cache.
-        /// </param>
-        /// <param name="fileMonitors">
-        /// The file monitors to keep track of.
-        /// </param>
+        /// <param name="key">The filename of the item to add.</param>
+        /// <param name="contents">The contents of the file to cache.</param>
+        /// <param name="fileMonitors">The file monitors to keep track of.</param>
         protected void AddItemToCache(string key, string contents, ConcurrentBag<string> fileMonitors) {
             if (!string.IsNullOrWhiteSpace(contents)) {
                 CacheItemPolicy cacheItemPolicy = new CacheItemPolicy { Priority = CacheItemPriority.NotRemovable };

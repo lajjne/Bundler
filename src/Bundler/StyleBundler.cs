@@ -15,17 +15,13 @@ namespace Bundler {
         /// <summary>
         /// The auto prefixer postprocessor.
         /// </summary>
-        private static readonly AutoPrefixerPostprocessor AutoPrefixerPostprocessor = new AutoPrefixerPostprocessor();
+        private static readonly AutoPrefixerPostprocessor _autoprefixer = new AutoPrefixerPostprocessor();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StyleBundler"/> class.
         /// </summary>
-        /// <param name="options">
-        /// The options containing instructions for the bundler.
-        /// </param>
-        /// <param name="context">
-        /// The current context.
-        /// </param>
+        /// <param name="options">The options containing instructions for the bundler.</param>
+        /// <param name="context">The current context.</param>
         public StyleBundler(BundleOptions options, HttpContext context)
             : base(options, context) {
         }
@@ -38,7 +34,7 @@ namespace Bundler {
         public override string Minify(string resource) {
             CssMinifier minifier;
 
-            if (this.Options.Minify) {
+            if (Options.Minify) {
                 minifier = new CssMinifier { RemoveWhiteSpace = true };
             } else {
                 minifier = new CssMinifier { RemoveWhiteSpace = false };
@@ -50,34 +46,26 @@ namespace Bundler {
         /// <summary>
         /// Post process the input using auto prefixer.
         /// </summary>
-        /// <param name="input">
-        /// The input CSS.
-        /// </param>
-        /// <param name="options">
-        /// The <see cref="AutoPrefixerOptions"/>.
-        /// </param>
-        /// <returns>
-        /// The <see cref="string"/> containing the post-processed CSS.
-        /// </returns>
+        /// <param name="input">The input CSS.</param>
+        /// <param name="options">The <see cref="AutoPrefixerOptions"/>.</param>
+        /// <returns>The <see cref="string"/> containing the post-processed CSS.</returns>
         public string AutoPrefix(string input, AutoPrefixerOptions options) {
-            return AutoPrefixerPostprocessor.Transform(input, options);
+            return _autoprefixer.Transform(input, options);
         }
 
         /// <summary>
         /// Loads the local file.
         /// </summary>
         /// <param name="file">The file to load.</param>
-        /// <returns>
-        /// The contents of the local file as a string.
-        /// </returns>
+        /// <returns>The contents of the local file as a string.</returns>
         protected override async Task<string> LoadFileAsync(string file) {
             string contents = await base.LoadFileAsync(file);
 
-            // Preprocess
-            contents = this.PreProcessInput(contents, file);
+            // preprocess
+            contents = PreProcessInput(contents, file);
 
-            // Watch file if applicable.
-            this.AddFileMonitor(file);
+            // watch file if applicable.
+            AddFileMonitor(file);
 
             return contents;
         }
@@ -89,10 +77,10 @@ namespace Bundler {
         /// <param name="path">The path to the file.</param>
         /// <returns>The transformed string.</returns>
         protected override string PreProcessInput(string input, string path) {
-            // Do the base processing then process any specific code here. 
+            // do the base processing then process any specific code here
             input = base.PreProcessInput(input, path);
 
-            // Run the last filter. This should be the ResourcePreprocessor.
+            // run the last filter, this should be the ResourcePreprocessor
             input = PreprocessorManager.Instance.Preprocessors
                 .First(preprocessor => preprocessor.AllowedExtensions == null)
                 .Transform(input, path, this);

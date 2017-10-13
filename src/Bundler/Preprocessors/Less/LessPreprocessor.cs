@@ -51,6 +51,7 @@ namespace Bundler.Preprocessors.Less {
                     throw lessEngine.LastTransformationError; 
                 }
 
+                // REVIEW: also check Options.WatchAlways?
                 if (bundler.Options.WatchFiles) {
                     // Add each import as a file dependency
                     IEnumerable<string> imports = lessEngine.GetImports();

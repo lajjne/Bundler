@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
+using Bundler.Helpers;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
 using System.Web;
-using System.Text.RegularExpressions;
-using Bundler.Helpers;
 
 namespace Bundler.Extensions {
 
@@ -13,7 +9,6 @@ namespace Bundler.Extensions {
     /// Helper and extension methods for collections.
     /// </summary>
     public static class CollectionExtensions {
-
 
         /// <summary>
         /// Creates a collection of keys and values from the specified input object.

@@ -15,8 +15,7 @@ namespace Bundler.Helpers {
         /// <summary>
         /// A collection of reference counters used for tracking references to the same object.
         /// </summary>
-        private static readonly Dictionary<object, RefCounted<SemaphoreSlim>> SemaphoreSlims
-                              = new Dictionary<object, RefCounted<SemaphoreSlim>>();
+        private static readonly Dictionary<object, RefCounted<SemaphoreSlim>> SemaphoreSlims = new Dictionary<object, RefCounted<SemaphoreSlim>>();
 
         /// <summary>
         /// Locks the current thread asynchronously.
