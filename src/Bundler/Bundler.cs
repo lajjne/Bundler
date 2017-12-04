@@ -180,12 +180,46 @@ namespace Bundler {
         /// </returns>
         public static HtmlString Styles(string[] fileNames, object htmlAttributes = null, BundleOutput? output = null) {
             output = output ?? GetDefaultBundleOutput();
+            var attributes = htmlAttributes.ToNameValueCollection().AsHtmlAttributes(prefix: " ");
+            StringBuilder sb = new StringBuilder();
+            foreach (var url in StyleUrls(fileNames, output.Value)) {
+                sb.AppendFormat(LINK_TEMPLATE, url, attributes).AppendLine();
+            }
+            return new HtmlString(sb.ToString().Trim());
+        }
+
+
+        /// <summary>
+        /// Returns the urls linking to the bundled css representing the given files.
+        /// </summary>
+        /// <param name="fileNames">The files to link to. These can be .css, .less, .sass, and .scss files.</param>
+        /// <returns>The urls to the bundled stylesheet files.</returns>
+        public static IEnumerable<string> StyleUrls(params string[] fileNames) {
+            return StyleUrls(fileNames, null);
+        }
+
+        /// <summary>
+        /// Returns the urls linking to the bundled css representing the given files.
+        /// </summary>
+        /// <param name="fileName">The file to link to. It can be a .css, .less, .sass, or .scss file.</param>
+        /// <param name="output">Decides how to combine and/or minify the given file.</param>
+        /// <returns>The url to the bundled stylesheet file.</returns>
+        public static IEnumerable<string> StyleUrls(string fileName, BundleOutput? output = null) {
+            return StyleUrls(new[] { fileName }, output);
+        }
+
+        /// <summary>
+        /// Returns the urls linking to the bundled css representing the given files.
+        /// </summary>
+        /// <param name="fileNames">The files to link to. These can be .css, .less, .sass, and .scss files.</param>
+        /// <param name="output">Bundle options deciding how to combine and/or minify the given files.</param>
+        /// <returns>The urls to the bundled stylesheet files.</returns>
+        public static IEnumerable<string> StyleUrls(string[] fileNames, BundleOutput? output = null) {
+            output = output ?? GetDefaultBundleOutput();
 
             bool combined = output == BundleOutput.Combined || output == BundleOutput.MinifiedAndCombined;
             bool minified = output == BundleOutput.Minified || output == BundleOutput.MinifiedAndCombined;
             string ext = minified ? DOT_MIN + DOT_CSS : DOT_CSS;
-
-            var attributes = htmlAttributes.ToNameValueCollection().AsHtmlAttributes(suffix: " ");
 
             HttpContext context = HttpContext.Current;
             if (combined) {
@@ -193,9 +227,7 @@ namespace Bundler {
                 string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, minified, fileNames));
                 if (!string.IsNullOrWhiteSpace(fileContent)) {
                     string fileName = $"{fileContent.ToMd5Fingerprint()}{ext}";
-                    return new HtmlString(string.Format(LINK_TEMPLATE,
-                        AsyncHelper.RunSync(() => ResourceHelper.GetOrCreateFileAsync(fileName, fileContent)),
-                        attributes));
+                    yield return AsyncHelper.RunSync(() => ResourceHelper.GetOrCreateFileAsync(fileName, fileContent));
                 }
             } else {
                 // render file(s) individually (but first expand .bundle files)
@@ -205,16 +237,10 @@ namespace Bundler {
                     string fileContent = AsyncHelper.RunSync(() => StyleProcessor.ProcessCssCrunchAsync(context, minified, name));
                     if (!string.IsNullOrWhiteSpace(fileContent)) {
                         string fileName = $"{Path.GetFileNameWithoutExtension(name)}.{fileContent.ToMd5Fingerprint()}{ext}";
-                        stringBuilder.AppendFormat(LINK_TEMPLATE,
-                            AsyncHelper.RunSync(() => ResourceHelper.GetOrCreateFileAsync(fileName, fileContent)),
-                            attributes);
-                        stringBuilder.AppendLine();
+                        yield return AsyncHelper.RunSync(() => ResourceHelper.GetOrCreateFileAsync(fileName, fileContent));
                     }
                 }
-                return new HtmlString(stringBuilder.ToString().Trim());
             }
-
-            return null;
         }
 
         /// <summary>
