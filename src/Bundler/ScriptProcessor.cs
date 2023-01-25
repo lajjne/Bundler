@@ -1,4 +1,5 @@
-﻿using Bundler.Caching;
+﻿using AsyncKeyedLock;
+using Bundler.Caching;
 using Bundler.Extensions;
 using Bundler.Helpers;
 using Bundler.Preprocessors;
@@ -18,7 +19,11 @@ namespace Bundler {
         /// <summary>
         /// Ensures processing is atomic.
         /// </summary>
-        private static readonly AsyncDuplicateLock _locker = new AsyncDuplicateLock();
+        private static readonly AsyncKeyedLocker<string> _locker = new AsyncKeyedLocker<string>(o =>
+        {
+            o.PoolSize = 20;
+            o.PoolInitialFill = 1;
+        });
 
         /// <summary>
         /// Processes the JavaScript request and returns the result.
@@ -33,7 +38,7 @@ namespace Bundler {
             if (paths != null) {
                 string key = string.Concat(paths).ToMd5Fingerprint() + (minify ? Bundler.DOT_MIN : "");
 
-                using (await _locker.LockAsync(key)) {
+                using (await _locker.LockAsync(key).ConfigureAwait(false)) {
                     combinedJavaScript = (string)CacheManager.GetItem(key);
 
                     if (string.IsNullOrWhiteSpace(combinedJavaScript)) {

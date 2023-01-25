@@ -1,4 +1,5 @@
-﻿using Bundler.Caching;
+﻿using AsyncKeyedLock;
+using Bundler.Caching;
 using Bundler.Extensions;
 using Bundler.Helpers;
 using Bundler.Preprocessors;
@@ -14,11 +15,15 @@ namespace Bundler {
     /// The CSS processor for processing CSS files.
     /// </summary>
     public class StyleProcessor : ProcessorBase {
-        
+
         /// <summary>
         /// Ensures processing is atomic.
         /// </summary>
-        private static readonly AsyncDuplicateLock _locker = new AsyncDuplicateLock();
+        private static readonly AsyncKeyedLocker<string> _locker = new AsyncKeyedLocker<string>(o =>
+        {
+            o.PoolSize = 20;
+            o.PoolInitialFill = 1;
+        });
 
         /// <summary>
         /// Processes the css request and returns the result.
@@ -35,7 +40,7 @@ namespace Bundler {
             if (paths != null) {
                 string key = string.Concat(paths).ToMd5Fingerprint() + (minify ? Bundler.DOT_MIN : "");
 
-                using (await _locker.LockAsync(key)) {
+                using (await _locker.LockAsync(key).ConfigureAwait(false)) {
                     combinedCSS = (string)CacheManager.GetItem(key);
 
                     if (string.IsNullOrWhiteSpace(combinedCSS)) {
